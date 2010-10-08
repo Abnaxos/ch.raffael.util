@@ -45,11 +45,11 @@ public class Property<T> implements Serializable {
     }
 
     public static <T> Property<T> create(String name) {
-        return new Property(name);
+        return new Property<T>(name);
     }
 
     public static <T> Property<T> create(String name, T value) {
-        return new Property(name, value);
+        return new Property<T>(name, value);
     }
 
     public String getName() {
@@ -167,6 +167,7 @@ public class Property<T> implements Serializable {
         }
     }
 
+    @SuppressWarnings({ "UnusedDeclaration" })
     protected void didChange(T oldValue, T newValue) {
     }
 
