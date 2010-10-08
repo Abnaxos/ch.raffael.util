@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 public class LocaleSearch {
 
     public static final char DEFAULT_SEPARATOR = '_';
-    
+
     private final String locale;
     private final String[] search;
 
@@ -40,7 +40,7 @@ public class LocaleSearch {
         this.locale = locale;
         int count = 1;
         for ( int i = 0; i < locale.length(); i++ ) {
-            if ( locale.charAt(i) == DEFAULT_SEPARATOR ) {
+            if ( locale.charAt(i) == '_' ) {
                 count++;
             }
         }
@@ -48,7 +48,7 @@ public class LocaleSearch {
         search[0] = locale;
         int index = 1;
         for ( int i = locale.length() - 1; i >= 0; i-- ) {
-            if ( locale.charAt(i) == DEFAULT_SEPARATOR ) {
+            if ( locale.charAt(i) == '_' ) {
                 search[index++] = locale.substring(0, i);
             }
         }
@@ -94,6 +94,11 @@ public class LocaleSearch {
     @NotNull
     public String[] getSearch() {
         return Arrays.copyOf(search, search.length);
+    }
+
+    @NotNull
+    public String[] getSearch(@NotNull String prefix) {
+        return getSearch(prefix, null, DEFAULT_SEPARATOR);
     }
 
     @NotNull

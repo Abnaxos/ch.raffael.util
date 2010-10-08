@@ -14,37 +14,27 @@
  * limitations under the License.
  */
 
-package ch.raffael.util.i18n;
+package ch.raffael.util.i18n.impl.handlers;
 
-import org.jetbrains.annotations.NotNull;
+import java.io.ByteArrayInputStream;
+import java.net.URL;
+
+import ch.raffael.util.i18n.ResourceBundle;
+import ch.raffael.util.i18n.impl.ResourcePointer;
 
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public interface ResourceBundle {
+public class InputStreamHandler extends NoParametersHandler {
 
-    @NotNull
-    Meta meta();
-
-    interface Meta {
-        @NotNull
-        <T> Resource<T> resource(Class<T> type, String name);
-        @NotNull
-        <T> Resource<T> resource(Class<T> type, String name, Class<?>... paramTypes);
-        @NotNull
-        Resource<Object> resource(String name);
-        @NotNull
-        Resource<Object> resource(String name, Class<?>... paramTypes);
+    @Override
+    public Object resolve(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl, String value) throws Exception {
+        return new URL(baseUrl, value).openStream();
     }
 
-    interface Resource<T> {
-        @NotNull 
-        T get();
-        @NotNull
-        T get(Object... args);
-        @NotNull
-        Class<?> type();
+    @Override
+    public Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl) throws Exception {
+        return new ByteArrayInputStream(new byte[0]);
     }
-
 }

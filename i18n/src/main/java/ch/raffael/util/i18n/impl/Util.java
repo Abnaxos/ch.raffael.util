@@ -14,37 +14,32 @@
  * limitations under the License.
  */
 
-package ch.raffael.util.i18n;
+package ch.raffael.util.i18n.impl;
 
-import org.jetbrains.annotations.NotNull;
+import ch.raffael.util.common.annotations.Utility;
+import ch.raffael.util.i18n.ResourceBundle;
 
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public interface ResourceBundle {
+@Utility
+public class Util {
 
-    @NotNull
-    Meta meta();
-
-    interface Meta {
-        @NotNull
-        <T> Resource<T> resource(Class<T> type, String name);
-        @NotNull
-        <T> Resource<T> resource(Class<T> type, String name, Class<?>... paramTypes);
-        @NotNull
-        Resource<Object> resource(String name);
-        @NotNull
-        Resource<Object> resource(String name, Class<?>... paramTypes);
+    private Util() {
     }
 
-    interface Resource<T> {
-        @NotNull 
-        T get();
-        @NotNull
-        T get(Object... args);
-        @NotNull
-        Class<?> type();
+    public static String stripPackage(Class<?> clazz) {
+        String name = clazz.getName();
+        int pos = name.lastIndexOf('.');
+        if ( pos >= 0 ) {
+            name = name.substring(pos + 1);
+        }
+        return name;
+    }
+
+    public static String resourceString(Class<? extends ResourceBundle> bundleClass, MethodSignature signature) {
+        return bundleClass.getName() + "::" + signature;
     }
 
 }

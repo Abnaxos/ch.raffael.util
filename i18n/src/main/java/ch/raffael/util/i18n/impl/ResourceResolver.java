@@ -14,37 +14,18 @@
  * limitations under the License.
  */
 
-package ch.raffael.util.i18n;
+package ch.raffael.util.i18n.impl;
 
-import org.jetbrains.annotations.NotNull;
+import java.net.URL;
 
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public interface ResourceBundle {
+public interface ResourceResolver {
 
-    @NotNull
-    Meta meta();
+    URL getBaseUrl();
 
-    interface Meta {
-        @NotNull
-        <T> Resource<T> resource(Class<T> type, String name);
-        @NotNull
-        <T> Resource<T> resource(Class<T> type, String name, Class<?>... paramTypes);
-        @NotNull
-        Resource<Object> resource(String name);
-        @NotNull
-        Resource<Object> resource(String name, Class<?>... paramTypes);
-    }
-
-    interface Resource<T> {
-        @NotNull 
-        T get();
-        @NotNull
-        T get(Object... args);
-        @NotNull
-        Class<?> type();
-    }
+    String getValue(ResourcePointer ptr);
 
 }

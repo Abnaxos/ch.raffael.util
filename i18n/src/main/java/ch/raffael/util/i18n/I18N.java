@@ -22,9 +22,9 @@ import org.slf4j.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
-import ch.raffael.util.common.NotImplementedException;
 import ch.raffael.util.common.annotations.Utility;
 import ch.raffael.util.common.logging.LogUtil;
+import ch.raffael.util.i18n.impl.BundleManager;
 
 
 /**
@@ -37,22 +37,22 @@ public class I18N {
     private static final Logger log = LogUtil.getLogger();
 
     private static volatile boolean lenient = false;
-    private static String locale;
-    private static LocaleSearch localeSearch;
+    private static String locale = Locale.getDefault().toString();
+    private static LocaleSearch localeSearch = new LocaleSearch(locale);
 
     private I18N() {
     }
 
-    public synchronized static Locale getLocale() {
+    public static synchronized Locale getLocale() {
         return new Locale(locale);
     }
 
-    public synchronized static void setLocale(Locale locale) {
+    public static synchronized void setLocale(Locale locale) {
         I18N.locale = locale.toString();
         localeSearch = new LocaleSearch(I18N.locale);
     }
 
-    public synchronized LocaleSearch getLocaleSearch() {
+    public static synchronized LocaleSearch getLocaleSearch() {
         return localeSearch;
     }
 
@@ -66,7 +66,7 @@ public class I18N {
 
     @NotNull
     public static <T extends ResourceBundle> T getBundle(Class<T> bundleClass) {
-        throw new NotImplementedException(); // FIXME: not implemented
+        return BundleManager.getInstance().getOrLoad(bundleClass).getResourceBundle(bundleClass);
     }
 
 }

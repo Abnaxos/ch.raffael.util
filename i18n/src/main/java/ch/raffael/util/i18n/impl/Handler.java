@@ -14,37 +14,25 @@
  * limitations under the License.
  */
 
-package ch.raffael.util.i18n;
+package ch.raffael.util.i18n.impl;
 
-import org.jetbrains.annotations.NotNull;
+import java.net.URL;
+
+import ch.raffael.util.i18n.I18NException;
+import ch.raffael.util.i18n.ResourceBundle;
 
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public interface ResourceBundle {
+public interface Handler {
 
-    @NotNull
-    Meta meta();
+    void validateSignature(Class<? extends ResourceBundle> bundleClass, MethodSignature signature) throws I18NException;
+    
+    Object resolve(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl, String value) throws Exception;
 
-    interface Meta {
-        @NotNull
-        <T> Resource<T> resource(Class<T> type, String name);
-        @NotNull
-        <T> Resource<T> resource(Class<T> type, String name, Class<?>... paramTypes);
-        @NotNull
-        Resource<Object> resource(String name);
-        @NotNull
-        Resource<Object> resource(String name, Class<?>... paramTypes);
-    }
+    Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl) throws Exception;
 
-    interface Resource<T> {
-        @NotNull 
-        T get();
-        @NotNull
-        T get(Object... args);
-        @NotNull
-        Class<?> type();
-    }
+    Object parametrize(Object value, Object[] parameters) throws Exception;
 
 }
