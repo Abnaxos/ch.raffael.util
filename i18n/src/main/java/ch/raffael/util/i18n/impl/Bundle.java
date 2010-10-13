@@ -20,6 +20,7 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +31,6 @@ import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import ch.raffael.util.common.NotImplementedException;
 import ch.raffael.util.common.logging.LogUtil;
 import ch.raffael.util.i18n.Default;
 import ch.raffael.util.i18n.Forward;
@@ -61,6 +61,9 @@ public class Bundle implements InvocationHandler {
     private final Map<Method, MethodSignature> signatures = new HashMap<Method, MethodSignature>();
 
     private ResourceResolver resolver;
+
+    private MetaImpl meta = null;
+    private final Map<ResourceIndicator, ResourceImpl<Object>> dynamicsCache = new HashMap<ResourceIndicator, ResourceImpl<Object>>();
 
 
     public Bundle(@NotNull Class<? extends ResourceBundle> bundleClass) {
@@ -140,6 +143,78 @@ public class Bundle implements InvocationHandler {
         }
     }
 
+    @Override
+    public synchronized Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if ( isMetaMethod(method) ) {
+            if ( meta == null ) {
+                meta = new MetaImpl();
+            }
+            return meta;
+        }
+        MethodSignature signature = signatures.get(method);
+        if ( signature == null ) {
+            // just in case, shouldn't happen, actually, after init()
+            signature = new MethodSignature(method);
+            signatures.put(method, signature);
+        }
+        return getResource(signature, args);
+    }
+
+    private Object getResource(MethodSignature signature, Object[] args) {
+        Object[] selectors = null;
+        Object[] parameters = null;
+        List<MethodSignature.Argument> arguments = signature.getArguments();
+        if ( arguments.size() > 0 ) {
+            if ( signature.getSelectorCount() > 0 ) {
+                selectors = new Object[signature.getSelectorCount()];
+            }
+            int paramCount = args.length - signature.getSelectorCount();
+            if ( paramCount > 0 ) {
+                parameters = new Object[paramCount];
+            }
+            int selIdx = 0;
+            int paramIdx = 0;
+            for ( int i = 0; i < args.length; i++ ) {
+                if ( arguments.get(i).isSelector() ) {
+                    assert selectors != null;
+                    selectors[selIdx++] = args[i];
+                }
+                else {
+                    assert parameters != null;
+                    parameters[paramIdx++] = args[i];
+                }
+            }
+        }
+        ResourcePointer ptr = new ResourcePointer(signature, selectors, I18N.getLocaleSearch());
+        ResourceHolder holder = lookup(ptr);
+        try {
+            if ( holder == null ) {
+                if ( I18N.isLenient() ) {
+                    Handler handler = HandlerManager.getInstance().getHandler(signature.getReturnType());
+                    assert handler != null; // has been checked in init()
+                    return handler.notFound(bundleClass, ptr, resolver.getBaseUrl());
+                }
+                else {
+                    throw new NotFoundException("Resource " + Util.resourceString(bundleClass, signature) + " not found");
+                }
+            }
+            else {
+                if ( parameters != null ) {
+                    return holder.handler.parametrize(holder.get(), parameters);
+                }
+                else {
+                    return holder.get();
+                }
+            }
+        }
+        catch ( I18NException e ) {
+            throw e;
+        }
+        catch ( Exception e ) {
+            throw new I18NException("Error getting resource " + signature + " with arguments " + (args == null ? "[]" : Arrays.asList(args)), e);
+        }
+    }
+
     @Nullable
     private ResourceHolder lookup(@NotNull ResourcePointer ptr) {
         if ( resources.containsKey(ptr) ) {
@@ -178,63 +253,6 @@ public class Bundle implements InvocationHandler {
         }
         resources.put(ptr, inherited);
         return inherited;
-    }
-
-    @Override
-    public synchronized Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if ( isMetaMethod(method) ) {
-            throw new NotImplementedException("meta()"); // FIXME: not implemented
-        }
-        MethodSignature signature = signatures.get(method);
-        if ( signature == null ) {
-            // just in case, shouldn't happen, actually, after init()
-            signature = new MethodSignature(method);
-            signatures.put(method, signature);
-        }
-        Object[] selectors = null;
-        Object[] parameters = null;
-        List<MethodSignature.Argument> arguments = signature.getArguments();
-        if ( arguments.size() > 0 ) {
-            if ( signature.getSelectorCount() > 0 ) {
-                selectors = new Object[signature.getSelectorCount()];
-            }
-            int paramCount = args.length - signature.getSelectorCount();
-            if ( paramCount > 0 ) {
-                parameters = new Object[paramCount];
-            }
-            int selIdx = 0;
-            int paramIdx = 0;
-            for ( int i = 0; i < args.length; i++ ) {
-                if ( arguments.get(i).isSelector() ) {
-                    assert selectors != null;
-                    selectors[selIdx++] = args[i];
-                }
-                else {
-                    assert parameters != null;
-                    parameters[paramIdx++] = args[i];
-                }
-            }
-        }
-        ResourcePointer ptr = new ResourcePointer(signature, selectors, I18N.getLocaleSearch());
-        ResourceHolder holder = lookup(ptr);
-        if ( holder == null ) {
-            if ( I18N.isLenient() ) {
-                Handler handler = HandlerManager.getInstance().getHandler(signature.getReturnType());
-                assert handler != null; // has been checked in init()
-                return handler.notFound(bundleClass, ptr, resolver.getBaseUrl());
-            }
-            else {
-                throw new NotFoundException("Resource " + Util.resourceString(bundleClass, signature) + " not found");
-            }
-        }
-        else {
-            if ( parameters != null ) {
-                return holder.handler.parametrize(holder.get(), parameters);
-            }
-            else {
-                return holder.get();
-            }
-        }
     }
 
     private static boolean isMetaMethod(Method method) {
@@ -283,6 +301,99 @@ public class Bundle implements InvocationHandler {
                 this.value = new SoftReference<Object>(value);
             }
             return value;
+        }
+    }
+
+    private class MetaImpl implements ResourceBundle.Meta {
+
+        @NotNull
+        @Override
+        public <T> ResourceBundle.Resource<T> resource(Class<T> type, String name) {
+            return resource(type, name, (Class<?>[])null);
+        }
+
+        @SuppressWarnings({ "unchecked" })
+        @NotNull
+        @Override
+        public <T> ResourceBundle.Resource<T> resource(Class<T> type, String name, Class<?>... paramTypes) {
+            ResourceBundle.Resource result = resource(name, paramTypes);
+            if ( !type.isAssignableFrom(result.type()) ) {
+                throw new I18NException("Return type mismatch at resource " + ((ResourceImpl)result).signature + " <-> " + type);
+            }
+            return (ResourceBundle.Resource<T>)result;
+        }
+
+        @NotNull
+        @Override
+        public ResourceBundle.Resource<Object> resource(String name) {
+            return resource(name, (Class<?>[])null);
+        }
+
+        @NotNull
+        @Override
+        public ResourceBundle.Resource<Object> resource(String name, Class<?>... paramTypes) {
+            synchronized ( Bundle.this ) {
+                ResourceIndicator indicator = new ResourceIndicator(name, paramTypes);
+                ResourceImpl<Object> result = dynamicsCache.get(indicator);
+                if ( result == null ) {
+                    MethodSignature signature = methods.get(indicator);
+                    if ( signature == null ) {
+                        Method method;
+                        try {
+                            method = bundleClass.getMethod(name, paramTypes);
+                        }
+                        catch ( NoSuchMethodException e ) {
+                            throw new I18NException("Bundle " + bundleClass.getName() + " has no method " + indicator);
+                        }
+                        methods.put(indicator, signature);
+                        signatures.put(method, signature);
+                    }
+                    result = new ResourceImpl<Object>(signature);
+                    dynamicsCache.put(indicator, result);
+                }
+                return result;
+            }
+        }
+
+    }
+
+    private class ResourceImpl<T> implements ResourceBundle.Resource<T> {
+        private final MethodSignature signature;
+        private ResourceImpl(MethodSignature signature) {
+            this.signature = signature;
+        }
+        @NotNull
+        @Override
+        public T get() {
+            return get((Object[])null);
+        }
+        @SuppressWarnings({ "unchecked" })
+        @NotNull
+        @Override
+        public T get(Object... args) {
+            synchronized ( Bundle.this ) {
+                int argCount = 0;
+                if ( args != null ) {
+                    argCount = args.length;
+                }
+                if ( signature.getArguments().size() != argCount ) {
+                    throw new IllegalArgumentException("Invalid argument count " + argCount + " for resource " + signature);
+                }
+                if ( args != null ) {
+                    for ( int i = 0; i < args.length; i++ ) {
+                        if ( args[i] != null && !signature.getArguments().get(i).getType().isInstance(args[i]) ) {
+                            throw new IllegalArgumentException("Argument " + i + " for resource " + signature + ": " + args[i] + " is not an instance of " + signature.getArguments().get(i).getType());
+                        }
+                    }
+                }
+                return (T)getResource(signature, args);
+            }
+        }
+        @SuppressWarnings({ "unchecked" })
+        @NotNull
+        @Override
+        public Class<T> type() {
+            return (Class<T>)signature.getReturnType();
         }
     }
 

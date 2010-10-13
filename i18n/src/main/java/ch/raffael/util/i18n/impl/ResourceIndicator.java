@@ -29,8 +29,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ResourceIndicator {
 
-    public static final ResourceIndicator META = new ResourceIndicator("meta", null);
-
     private final String methodName;
     private final List<Class<?>> parameterTypes;
 

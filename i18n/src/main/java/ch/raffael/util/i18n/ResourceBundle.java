@@ -44,7 +44,7 @@ public interface ResourceBundle {
         @NotNull
         T get(Object... args);
         @NotNull
-        Class<?> type();
+        Class<T> type();
     }
 
 }
