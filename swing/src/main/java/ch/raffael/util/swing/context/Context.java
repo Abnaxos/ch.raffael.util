@@ -66,6 +66,7 @@ public interface Context {
 
     Context create();
 
-    <T> T instantiate(Class<T> clazz);
+    Context create(@NotNull Component attachTo);
 
+    <T> T instantiate(Class<T> clazz);
 }

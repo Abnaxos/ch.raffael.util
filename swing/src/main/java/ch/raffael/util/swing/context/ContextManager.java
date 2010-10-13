@@ -20,20 +20,25 @@ import java.awt.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JMenu;
+import javax.swing.JPopupMenu;
+import javax.swing.JToolBar;
+
 import org.slf4j.Logger;
 
 import com.google.common.collect.MapMaker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import ch.raffael.util.swing.DefaultIconManager;
 import ch.raffael.util.swing.DefaultWindowPlacementManager;
-import ch.raffael.util.swing.IconManager;
 import ch.raffael.util.swing.SwingUtil;
 import ch.raffael.util.swing.WindowPlacementManager;
-import ch.raffael.util.swing.actions.ActionComponentFactory;
-import ch.raffael.util.swing.actions.DefaultActionComponentFactory;
-import ch.raffael.util.swing.actions.JideActionComponentFactory;
+import ch.raffael.util.swing.actions.ActionPresenter;
+import ch.raffael.util.swing.actions.DefaultActionPresenter;
+import ch.raffael.util.swing.actions.JideToolBarPresentationBuilder;
+import ch.raffael.util.swing.actions.MenuPresentationBuilder;
+import ch.raffael.util.swing.actions.PopupMenuPresentationBuilder;
+import ch.raffael.util.swing.actions.ToolBarPresentationBuilder;
 import ch.raffael.util.swing.tasks.DefaultTaskTracker;
 import ch.raffael.util.swing.tasks.TaskTracker;
 
@@ -54,16 +59,19 @@ public class ContextManager {
     }
 
     private void setupRootContext() {
-        root.put(Map.class, DefaultContext.INJECTOR_CACHE_KEY, new HashMap());
         root.put(WindowPlacementManager.class, new DefaultWindowPlacementManager());
-        root.put(IconManager.class, new DefaultIconManager());
+        DefaultActionPresenter presenter = new DefaultActionPresenter();
+        presenter.setBuilder(JMenu.class, MenuPresentationBuilder.class);
+        presenter.setBuilder(JPopupMenu.class, PopupMenuPresentationBuilder.class);
         if ( SwingUtil.isJideAvailable() ) {
-            root.put(ActionComponentFactory.class, new JideActionComponentFactory());
+            presenter.setBuilder(JToolBar.class, JideToolBarPresentationBuilder.class);
         }
         else {
-            root.put(ActionComponentFactory.class, new DefaultActionComponentFactory());
+            presenter.setBuilder(JToolBar.class, ToolBarPresentationBuilder.class);
         }
+        root.put(ActionPresenter.class, presenter);
         root.put(TaskTracker.class, new DefaultTaskTracker());
+        root.put(Map.class, DefaultContext.INJECTOR_CACHE_KEY, new HashMap());
         root.put(InjectionProvider.class, Logger.class, new LoggerInjectionProvider());
     }
 

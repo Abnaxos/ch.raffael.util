@@ -56,10 +56,10 @@ public class BeanCopy {
                         targetProp.getWriteMethod().invoke(target, sourceProp.getReadMethod().invoke(source));
                     }
                     catch ( IllegalAccessException e ) {
-                        throw new IllegalArgumentException("Error copying bean " + source + " to " + target, e);
+                        throw new BeanException("Error copying bean " + source + " to " + target, e);
                     }
                     catch ( InvocationTargetException e ) {
-                        throw new IllegalArgumentException("Error copying bean " + source + " to " + target, e);
+                        throw new BeanException("Error copying bean " + source + " to " + target, e);
                     }
                 }
             }
@@ -89,7 +89,7 @@ public class BeanCopy {
                     }
                 }
                 catch ( IntrospectionException e ) {
-                    throw new IllegalArgumentException("Error introspecting class " + clazz);
+                    throw new BeanException("Error introspecting class " + clazz);
                 }
                 propertyCache.put(clazz, Collections.unmodifiableMap(props));
             }

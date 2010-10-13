@@ -157,6 +157,13 @@ public class DefaultContext implements Context {
         return new DefaultContext(this);
     }
 
+    @Override
+    public Context create(@NotNull Component attachTo) {
+        Context ctx = create();
+        ContextManager.getInstance().map(ctx, attachTo);
+        return ctx;
+    }
+
     @SuppressWarnings({ "unchecked" })
     @Override
     public <T> T instantiate(Class<T> clazz) {

@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package ch.raffael.util.swing;
-
-import javax.swing.Icon;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
+package ch.raffael.util.swing.actions;
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public interface IconManager {
+public interface ActionPresenter {
 
-    @NotNull
-    public Icon get(@NotNull Class<?> clazz, @NotNull String resource);
-
-    @Nullable
-    public Icon get(@NotNull Object key);
-
-    public void put(@NotNull Object key, @NotNull Icon icon);
+    <T> PresentationBuilder<T> builder(Class<T> targetClass);
 
 }

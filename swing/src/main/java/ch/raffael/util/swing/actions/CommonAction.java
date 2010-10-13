@@ -20,6 +20,8 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.KeyStroke;
 
+import ch.raffael.util.swing.util.Mnemonic;
+
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.raffael.util.swing.actions;
+package ch.raffael.util.swing.util;
 
 import java.awt.Component;
 import java.util.regex.Matcher;
