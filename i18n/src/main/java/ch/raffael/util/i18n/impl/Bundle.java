@@ -298,6 +298,14 @@ public class Bundle implements InvocationHandler {
                 catch ( Exception e ) {
                     throw new I18NException("Error loading resource " + pointer, e);
                 }
+                if ( value == null ) {
+                    if ( I18N.isLenient() ) {
+                        return handler.notFound(bundleClass, pointer, resolver.getBaseUrl());
+                    }
+                    else {
+                        throw new NotFoundException("Cannot load resource " + pointer);
+                    }
+                }
                 this.value = new SoftReference<Object>(value);
             }
             return value;

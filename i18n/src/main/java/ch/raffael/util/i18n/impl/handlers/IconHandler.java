@@ -16,11 +16,11 @@
 
 package ch.raffael.util.i18n.impl.handlers;
 
+import java.awt.Image;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
 
-import ch.raffael.util.common.NotImplementedException;
 import ch.raffael.util.i18n.ResourceBundle;
 import ch.raffael.util.i18n.impl.ResourcePointer;
 
@@ -28,15 +28,21 @@ import ch.raffael.util.i18n.impl.ResourcePointer;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class IconHandler extends NoParametersHandler {
+public class IconHandler extends ImageHandler {
 
     @Override
     public Object resolve(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl, String value) throws Exception {
-        return new ImageIcon(new URL(baseUrl, value));
+        Image img = (Image)super.resolve(bundleClass, ptr, baseUrl, value);
+        if ( img == null ) {
+            return img;
+        }
+        else {
+            return new ImageIcon(img);
+        }
     }
 
     @Override
-    public Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl) throws Exception {
-        throw new NotImplementedException("notFound"); // FIXME: not implemented
+    public Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl) {
+        return new ImageIcon((Image)super.notFound(bundleClass, ptr, baseUrl));
     }
 }

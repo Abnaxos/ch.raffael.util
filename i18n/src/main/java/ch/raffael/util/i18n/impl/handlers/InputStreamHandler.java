@@ -34,7 +34,7 @@ public class InputStreamHandler extends NoParametersHandler {
     }
 
     @Override
-    public Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl) throws Exception {
+    public Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl) {
         return new ByteArrayInputStream(new byte[0]);
     }
 }

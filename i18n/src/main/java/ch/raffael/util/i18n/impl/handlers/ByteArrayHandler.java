@@ -60,7 +60,7 @@ public class ByteArrayHandler extends NoParametersHandler {
     }
 
     @Override
-    public Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl) throws Exception {
+    public Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl) {
         return new byte[0];
     }
 }

@@ -31,7 +31,7 @@ public interface Handler {
     
     Object resolve(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl, String value) throws Exception;
 
-    Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl) throws Exception;
+    Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl);
 
     Object parametrize(Object value, Object[] parameters) throws Exception;
 

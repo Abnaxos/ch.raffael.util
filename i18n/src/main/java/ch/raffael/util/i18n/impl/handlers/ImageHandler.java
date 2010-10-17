@@ -16,11 +16,21 @@
 
 package ch.raffael.util.i18n.impl.handlers;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
+import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
 
-import ch.raffael.util.common.NotImplementedException;
+import org.slf4j.Logger;
+
+import ch.raffael.util.common.logging.LogUtil;
 import ch.raffael.util.i18n.ResourceBundle;
 import ch.raffael.util.i18n.impl.ResourcePointer;
 
@@ -30,13 +40,65 @@ import ch.raffael.util.i18n.impl.ResourcePointer;
  */
 public class ImageHandler extends NoParametersHandler {
 
+    @SuppressWarnings("UnusedDeclaration")
+    private static final Logger log = LogUtil.getLogger();
+
+    private static BufferedImage notFound = null;
+
     @Override
     public Object resolve(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl, String value) throws Exception {
-        return ImageIO.read(new URL(baseUrl, value));
+        URL url = new URL(baseUrl, value);
+        log.debug("Loading image from {}");
+        InputStream input = null;
+        try {
+            input = new BufferedInputStream(url.openStream());
+            return ImageIO.read(input);
+        }
+        catch( FileNotFoundException e ) {
+            log.debug("No image data at {}", url);
+            return null;
+        }
+        finally {
+            if ( input != null ) {
+                try {
+                    input.close();
+                }
+                catch ( Exception e ) {
+                    log.error("Error closing stream from " + url, e);
+                }
+            }
+        }
     }
 
     @Override
-    public Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl) throws Exception {
-        throw new NotImplementedException("notFound"); // FIXME: not implemented
+    public Object notFound(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl) {
+        return notFound();
     }
+
+    private static synchronized Image notFound() {
+        if ( notFound == null ) {
+            notFound = new BufferedImage(16, 16, BufferedImage.TYPE_BYTE_BINARY,
+                                         new IndexColorModel(1, 2,
+                                                             new byte[] { 0, (byte)255 },
+                                                             new byte[] { 0, (byte)255 },
+                                                             new byte[] { 0, (byte)255 }
+                                                             ));
+            Graphics gfx = notFound.getGraphics();
+            for ( int i = 0; i < 16; i++ ) {
+                boolean set = i % 2 == 0;
+                for ( int j = 0; j < 16; j++ ) {
+                    if ( set ) {
+                        gfx.setColor(Color.WHITE);
+                    }
+                    else {
+                        gfx.setColor(Color.BLACK);
+                    }
+                    gfx.drawLine(i, j, i, j);
+                    set = !set;
+                }
+            }
+        }
+        return notFound;
+    }
+
 }
