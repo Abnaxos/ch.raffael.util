@@ -41,6 +41,11 @@ public class EnumListCellRenderer extends DefaultListCellRenderer {
 
     }
 
+    @SuppressWarnings({ "unchecked" })
+    public EnumListCellRenderer(Class<? extends Enum> enumClass, ResourceBundle bundle, String methodName) {
+        this(enumClass, bundle.meta().resource(String.class, methodName, enumClass));
+    }
+
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
