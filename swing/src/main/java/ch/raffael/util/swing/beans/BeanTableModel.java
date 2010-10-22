@@ -31,8 +31,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
 
 import org.slf4j.Logger;
 
@@ -180,6 +182,15 @@ public class BeanTableModel<T> extends AbstractTableModel {
             }
         }
         return -1;
+    }
+
+    @NotNull
+    public TableColumn getColumn(@NotNull JTable table, @NotNull String propertyName) {
+        int index = indexOfColumn(propertyName);
+        if ( index <= 0 ) {
+            throw new IllegalArgumentException("No column for property '" + propertyName + "'");
+        }
+        return table.getColumn(index);
     }
 
     private PropertyDescriptor getDescriptor(@NotNull String propertyName) {

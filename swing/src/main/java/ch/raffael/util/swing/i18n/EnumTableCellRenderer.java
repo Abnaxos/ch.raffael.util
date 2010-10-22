@@ -18,10 +18,8 @@ package ch.raffael.util.swing.i18n;
 
 import java.awt.Component;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JComboBox;
-import javax.swing.JList;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import ch.raffael.util.i18n.ResourceBundle;
 
@@ -29,37 +27,27 @@ import ch.raffael.util.i18n.ResourceBundle;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class EnumListCellRenderer<T extends Enum> extends DefaultListCellRenderer {
+public class EnumTableCellRenderer<T extends Enum> extends DefaultTableCellRenderer {
 
     private final Class<? extends Enum> enumClass;
     private final EnumToStringConverter<T> converter;
 
-    public EnumListCellRenderer(Class<T> enumClass, ResourceBundle.Resource<String> resource) {
+    public EnumTableCellRenderer(Class<T> enumClass, ResourceBundle.Resource<String> resource) {
         this.enumClass = enumClass;
         this.converter = new EnumToStringConverter<T>(enumClass, resource);
 
     }
 
-    public EnumListCellRenderer(Class<T> enumClass, ResourceBundle bundle, String methodName) {
+    public EnumTableCellRenderer(Class<T> enumClass, ResourceBundle bundle, String methodName) {
         this.enumClass = enumClass;
         this.converter = new EnumToStringConverter<T>(enumClass, bundle, methodName);
     }
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         setText(converter.asString((T)value));
         return this;
     }
-
-    public void install(JComboBox comboBox) {
-        DefaultComboBoxModel model = new DefaultComboBoxModel();
-        for ( Enum e : enumClass.getEnumConstants() ) {
-            model.addElement(e);
-        }
-        comboBox.setModel(model);
-        comboBox.setRenderer(this);
-    }
-
 }
