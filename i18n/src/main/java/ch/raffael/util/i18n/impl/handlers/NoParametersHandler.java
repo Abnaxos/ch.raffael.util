@@ -17,9 +17,9 @@
 package ch.raffael.util.i18n.impl.handlers;
 
 import ch.raffael.util.i18n.I18NException;
+import ch.raffael.util.i18n.MethodSignature;
 import ch.raffael.util.i18n.ResourceBundle;
 import ch.raffael.util.i18n.impl.Handler;
-import ch.raffael.util.i18n.impl.MethodSignature;
 
 
 /**

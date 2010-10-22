@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.raffael.util.i18n.impl;
+package ch.raffael.util.i18n;
 
 import java.util.Arrays;
 import java.util.Collections;

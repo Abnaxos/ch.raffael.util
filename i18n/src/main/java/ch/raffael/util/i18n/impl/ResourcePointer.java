@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import ch.raffael.util.i18n.LocaleSearch;
+import ch.raffael.util.i18n.MethodSignature;
 
 
 /**

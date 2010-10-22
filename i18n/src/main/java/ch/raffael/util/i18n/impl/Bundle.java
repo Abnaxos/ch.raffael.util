@@ -21,10 +21,13 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 
@@ -36,8 +39,10 @@ import ch.raffael.util.i18n.Default;
 import ch.raffael.util.i18n.Forward;
 import ch.raffael.util.i18n.I18N;
 import ch.raffael.util.i18n.I18NException;
+import ch.raffael.util.i18n.MethodSignature;
 import ch.raffael.util.i18n.NotFoundException;
 import ch.raffael.util.i18n.ResourceBundle;
+import ch.raffael.util.i18n.ResourceIndicator;
 
 
 /**
@@ -313,6 +318,16 @@ public class Bundle implements InvocationHandler {
     }
 
     private class MetaImpl implements ResourceBundle.Meta {
+
+        private final Set<MethodSignature> sigs =
+                Collections.unmodifiableSet(
+                        new HashSet<MethodSignature>(signatures.values()));
+
+        @NotNull
+        @Override
+        public Set<MethodSignature> methods() {
+            return sigs;
+        }
 
         @NotNull
         @Override

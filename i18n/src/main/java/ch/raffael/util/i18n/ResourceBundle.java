@@ -16,6 +16,8 @@
 
 package ch.raffael.util.i18n;
 
+import java.util.Set;
+
 import org.jetbrains.annotations.NotNull;
 
 
@@ -28,6 +30,9 @@ public interface ResourceBundle {
     Meta meta();
 
     interface Meta {
+        @NotNull
+        Set<MethodSignature> methods();
+
         @NotNull
         <T> Resource<T> resource(Class<T> type, String name);
         @NotNull

@@ -17,6 +17,7 @@
 package ch.raffael.util.i18n.impl;
 
 import ch.raffael.util.common.annotations.Utility;
+import ch.raffael.util.i18n.MethodSignature;
 import ch.raffael.util.i18n.ResourceBundle;
 
 

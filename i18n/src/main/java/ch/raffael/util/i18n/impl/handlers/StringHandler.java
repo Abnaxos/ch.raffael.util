@@ -20,9 +20,9 @@ import java.net.URL;
 import java.text.MessageFormat;
 
 import ch.raffael.util.i18n.I18NException;
+import ch.raffael.util.i18n.MethodSignature;
 import ch.raffael.util.i18n.ResourceBundle;
 import ch.raffael.util.i18n.impl.Handler;
-import ch.raffael.util.i18n.impl.MethodSignature;
 import ch.raffael.util.i18n.impl.ResourcePointer;
 
 

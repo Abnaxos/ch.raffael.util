@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package ch.raffael.util.i18n.impl;
+package ch.raffael.util.i18n;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import ch.raffael.util.i18n.I18NException;
-import ch.raffael.util.i18n.Selector;
 
 
 /**

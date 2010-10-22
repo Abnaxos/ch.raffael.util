@@ -19,6 +19,7 @@ package ch.raffael.util.i18n.impl;
 import java.net.URL;
 
 import ch.raffael.util.i18n.I18NException;
+import ch.raffael.util.i18n.MethodSignature;
 import ch.raffael.util.i18n.ResourceBundle;
 
 
