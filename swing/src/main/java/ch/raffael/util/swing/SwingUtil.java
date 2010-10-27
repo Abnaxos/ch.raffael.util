@@ -29,14 +29,26 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.text.JTextComponent;
+
+import org.slf4j.Logger;
+
+import com.jidesoft.plaf.LookAndFeelFactory;
+
+import ch.raffael.util.common.logging.LogUtil;
 
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
 public class SwingUtil {
+
+    @SuppressWarnings("UnusedDeclaration")
+    private static final Logger log = LogUtil.getLogger();
 
     private static final FocusListener SELECT_ALL_FOCUS_LISTENER = new FocusListener() {
         @Override
@@ -152,4 +164,19 @@ public class SwingUtil {
     public static boolean isJideAvailable() {
         return isJideAvailable;
     }
+
+    public static void setupMetalLookAndFeel() {
+        try {
+            // set color theme here
+            UIManager.setLookAndFeel(new MetalLookAndFeel());
+        }
+        catch ( UnsupportedLookAndFeelException e ) {
+            log.warn("Error installing Look and Feel", e);
+        }
+        UIManager.put("swing.boldMetal", false);
+        if ( isJideAvailable() ) {
+            LookAndFeelFactory.installJideExtension();
+        }
+    }
+
 }

@@ -16,13 +16,13 @@
 
 package ch.raffael.util.beans;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.EventListener;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -31,12 +31,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class EventEmitter<T extends EventListener> implements Iterable<T> {
 
-    private final List<T> listeners = new CopyOnWriteArrayList<T>();
+    private final Class<T> listenerClass;
+    private final CopyOnWriteArrayList<T> listeners = new CopyOnWriteArrayList<T>();
     private final T emitter;
 
     @SuppressWarnings({ "unchecked" })
     public EventEmitter(Class<T> clazz, ClassLoader loader) {
         emitter = (T)Proxy.newProxyInstance(loader, new Class<?>[] { clazz }, createInvocationHandler());
+        this.listenerClass = clazz;
     }
 
 
@@ -55,6 +57,14 @@ public class EventEmitter<T extends EventListener> implements Iterable<T> {
 
     public void removeListener(T listener) {
         listeners.remove(listener);
+    }
+
+    @SuppressWarnings({ "unchecked", "SuspiciousSystemArraycopy" })
+    public T[] getListeners() {
+        Object[] objArray = listeners.toArray();
+        T[] listeners = (T[])Array.newInstance(listenerClass, objArray.length);
+        System.arraycopy(objArray, 0, listeners, 0, objArray.length);
+        return listeners;
     }
 
     public int getListenerCount() {

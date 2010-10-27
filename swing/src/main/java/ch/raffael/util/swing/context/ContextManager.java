@@ -27,18 +27,22 @@ import javax.swing.JToolBar;
 import org.slf4j.Logger;
 
 import com.google.common.collect.MapMaker;
+import com.jidesoft.swing.JideSplitButton;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import ch.raffael.util.common.logging.LogUtil;
 import ch.raffael.util.swing.DefaultWindowPlacementManager;
 import ch.raffael.util.swing.SwingUtil;
 import ch.raffael.util.swing.WindowPlacementManager;
 import ch.raffael.util.swing.actions.ActionPresenter;
 import ch.raffael.util.swing.actions.DefaultActionPresenter;
-import ch.raffael.util.swing.actions.JideToolBarPresentationBuilder;
+import ch.raffael.util.swing.actions.JideSplitButtonPresentationBuilder;
 import ch.raffael.util.swing.actions.MenuPresentationBuilder;
 import ch.raffael.util.swing.actions.PopupMenuPresentationBuilder;
 import ch.raffael.util.swing.actions.ToolBarPresentationBuilder;
+import ch.raffael.util.swing.components.sideoanel.SideMenuBuilder;
+import ch.raffael.util.swing.components.sideoanel.SidePanel;
 import ch.raffael.util.swing.tasks.DefaultTaskTracker;
 import ch.raffael.util.swing.tasks.TaskTracker;
 
@@ -47,6 +51,9 @@ import ch.raffael.util.swing.tasks.TaskTracker;
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
 public class ContextManager {
+
+    @SuppressWarnings("UnusedDeclaration")
+    private static final Logger log = LogUtil.getLogger();
 
     private final static ContextManager INSTANCE = new ContextManager();
 
@@ -64,7 +71,9 @@ public class ContextManager {
         presenter.setBuilder(JMenu.class, MenuPresentationBuilder.class);
         presenter.setBuilder(JPopupMenu.class, PopupMenuPresentationBuilder.class);
         if ( SwingUtil.isJideAvailable() ) {
-            presenter.setBuilder(JToolBar.class, JideToolBarPresentationBuilder.class);
+            presenter.setBuilder(JToolBar.class, ch.raffael.util.swing.actions.JideToolBarPresentationBuilder.class);
+            presenter.setBuilder(JideSplitButton.class, JideSplitButtonPresentationBuilder.class);
+            presenter.setBuilder(SidePanel.class, SideMenuBuilder.class);
         }
         else {
             presenter.setBuilder(JToolBar.class, ToolBarPresentationBuilder.class);

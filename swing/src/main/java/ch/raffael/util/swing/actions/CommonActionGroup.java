@@ -69,6 +69,12 @@ public class CommonActionGroup extends CommonAction implements ActionGroup {
     }
 
     @Override
+    protected void init() {
+        setDefaultAction(null);
+        setFlat(false);
+    }
+
+    @Override
     public void addActionGroupListener(ActionGroupListener listener) {
         emitter.addListener(listener);
     }
