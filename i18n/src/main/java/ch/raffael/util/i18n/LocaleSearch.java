@@ -30,32 +30,34 @@ public class LocaleSearch {
 
     public static final char DEFAULT_SEPARATOR = '_';
 
-    private final String locale;
+    private final Locale locale;
     private final String[] search;
 
-    public LocaleSearch(String locale) {
-        if ( locale == null ) {
-            locale = Locale.getDefault().toString();
-        }
-        this.locale = locale;
-        int count = 1;
-        for ( int i = 0; i < locale.length(); i++ ) {
-            if ( locale.charAt(i) == '_' ) {
-                count++;
-            }
-        }
-        search = new String[count];
-        search[0] = locale;
-        int index = 1;
-        for ( int i = locale.length() - 1; i >= 0; i-- ) {
-            if ( locale.charAt(i) == '_' ) {
-                search[index++] = locale.substring(0, i);
-            }
-        }
-    }
-
+    @SuppressWarnings({ "UnusedAssignment" })
     public LocaleSearch(Locale locale) {
-        this((locale == null ? Locale.getDefault() : locale).toString());
+        this.locale = locale;
+        String[] search = null;
+        int searchIdx = 0;
+        if ( !locale.getVariant().isEmpty() ) {
+            search = new String[3];
+            search[searchIdx++] = locale.getLanguage() + "_" + locale.getCountry() + "_" + locale.getVariant();
+        }
+        if ( search != null || !locale.getCountry().isEmpty() ) {
+            if ( search == null ) {
+                search = new String[2];
+            }
+            search[searchIdx++] = locale.getLanguage() + "_" + locale.getCountry();
+        }
+        if ( search != null || !locale.getLanguage().isEmpty() ) {
+            if ( search == null ) {
+                search = new String[1];
+            }
+            search[searchIdx++] = locale.getLanguage();
+        }
+        if ( search == null ) {
+            search = new String[0];
+        }
+        this.search = search;
     }
 
     @Override
@@ -88,7 +90,7 @@ public class LocaleSearch {
 
     @NotNull
     public Locale getLocale() {
-        return new Locale(locale);
+        return locale;
     }
 
     @NotNull

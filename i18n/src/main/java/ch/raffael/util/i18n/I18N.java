@@ -37,18 +37,18 @@ public class I18N {
     private static final Logger log = LogUtil.getLogger();
 
     private static volatile boolean lenient = false;
-    private static String locale = Locale.getDefault().toString();
+    private static Locale locale = Locale.getDefault();
     private static LocaleSearch localeSearch = new LocaleSearch(locale);
 
     private I18N() {
     }
 
     public static synchronized Locale getLocale() {
-        return new Locale(locale);
+        return locale;
     }
 
     public static synchronized void setLocale(Locale locale) {
-        I18N.locale = locale.toString();
+        I18N.locale = locale;
         localeSearch = new LocaleSearch(I18N.locale);
     }
 
