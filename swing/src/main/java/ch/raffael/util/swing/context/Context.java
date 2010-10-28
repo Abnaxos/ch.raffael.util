@@ -27,6 +27,10 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface Context {
 
+    void addContextListener(ContextListener listener);
+    void removeContextListener(ContextListener listener);
+    ContextListener[] getContextListeners();
+
     @Nullable
     Context getParent();
 

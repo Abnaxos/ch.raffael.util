@@ -23,6 +23,8 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import ch.raffael.util.beans.EventEmitter;
+
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
@@ -33,6 +35,7 @@ public class DefaultContext implements Context {
 
     private final Map<Key, Object> objects = new HashMap<Key, Object>();
 
+    private final EventEmitter<ContextListener> contextEvents = EventEmitter.newEmitter(ContextListener.class);
     private final Context parent;
 
     DefaultContext(boolean dummyForRoot) {
@@ -45,6 +48,22 @@ public class DefaultContext implements Context {
 
     public DefaultContext(@NotNull Context parent) {
         this.parent = parent;
+        parent.addContextListener(new WeakContextListener(new ParentContextListener()));
+    }
+
+    @Override
+    public void addContextListener(ContextListener listener) {
+        contextEvents.addListener(listener);
+    }
+
+    @Override
+    public void removeContextListener(ContextListener listener) {
+        contextEvents.removeListener(listener);
+    }
+
+    @Override
+    public ContextListener[] getContextListeners() {
+        return contextEvents.getListeners();
     }
 
     public Context getParent() {
@@ -99,9 +118,7 @@ public class DefaultContext implements Context {
     @SuppressWarnings({ "unchecked" })
     @Override
     public <T> T get(@NotNull Class<T> clazz, @Nullable Object key) {
-        synchronized ( ContextManager.getInstance() ) {
-            return (T)objects.get(new Key(clazz, key));
-        }
+        return (T)objects.get(new Key(clazz, key));
     }
 
     @Override
@@ -112,9 +129,14 @@ public class DefaultContext implements Context {
     @SuppressWarnings({ "unchecked" })
     @Override
     public <T> T remove(@NotNull Class<T> clazz, @Nullable Object key) {
-        synchronized ( ContextManager.getInstance() ) {
-            return (T)objects.remove(new Key(clazz, key));
+        T oldValue = (T)objects.remove(new Key(clazz, key));
+        if ( oldValue != null ) {
+            Object newValue = find(clazz, key);
+            if ( !oldValue.equals(newValue) ) {
+                contextEvents.emitter().contextChanged(new ContextEvent(DefaultContext.this, clazz, key, oldValue, newValue));
+            }
         }
+        return oldValue;
     }
 
     @Override
@@ -125,7 +147,17 @@ public class DefaultContext implements Context {
     @SuppressWarnings({ "unchecked" })
     @Override
     public synchronized <T> T put(@NotNull Class<T> clazz, @Nullable Object key, @NotNull T value) {
-        return (T)objects.put(new Key(clazz, key), value);
+        T oldValue = (T)objects.put(new Key(clazz, key), value);
+        if ( oldValue == null ) {
+            // we didn't override, check whether our parent provided something
+            if ( parent != null ) {
+                oldValue = parent.find(clazz, key);
+            }
+        }
+        if ( oldValue == null || !oldValue.equals(value) ) {
+            contextEvents.emitter().contextChanged(new ContextEvent(DefaultContext.this, clazz, key, oldValue, value));
+        }
+        return oldValue;
     }
 
     @Override
@@ -207,6 +239,16 @@ public class DefaultContext implements Context {
             int result = clazz.hashCode();
             result = 31 * result + (key != null ? key.hashCode() : 0);
             return result;
+        }
+    }
+
+    private class ParentContextListener implements ContextListener {
+        @Override
+        public void contextChanged(ContextEvent event) {
+            Object mine = get(event.getType(), event.getKey());
+            if ( mine == null ) {
+                contextEvents.emitter().contextChanged(new ContextEvent(DefaultContext.this, event.getType(), event.getKey(), event.getOldValue(), event.getNewValue()));
+            }
         }
     }
     
