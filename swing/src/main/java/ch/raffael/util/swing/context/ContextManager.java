@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,8 +41,8 @@ import ch.raffael.util.swing.actions.JideSplitButtonPresentationBuilder;
 import ch.raffael.util.swing.actions.MenuPresentationBuilder;
 import ch.raffael.util.swing.actions.PopupMenuPresentationBuilder;
 import ch.raffael.util.swing.actions.ToolBarPresentationBuilder;
-import ch.raffael.util.swing.components.sideoanel.SideMenuBuilder;
-import ch.raffael.util.swing.components.sideoanel.SidePanel;
+import ch.raffael.util.swing.components.sidepanel.SideMenuBuilder;
+import ch.raffael.util.swing.components.sidepanel.SidePanel;
 import ch.raffael.util.swing.tasks.DefaultTaskTracker;
 import ch.raffael.util.swing.tasks.TaskTracker;
 

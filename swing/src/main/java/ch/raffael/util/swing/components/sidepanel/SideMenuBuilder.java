@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.raffael.util.swing.components.sideoanel;
+package ch.raffael.util.swing.components.sidepanel;
 
 import java.awt.Component;
 
@@ -143,9 +143,8 @@ public class SideMenuBuilder extends AbstractPresentationBuilder<SidePanel> {
         getMenuComponent(target).add(component);
     }
 
-    protected JComponent getMenuComponent(SidePanel target) {
+    public JComponent getMenuComponent(SidePanel target) {
         return (JComponent)((SimpleScrollPane)target.getComponent()).getViewport().getComponent(0);
-        //return (JComponent)target.getComponent();
     }
 
 }

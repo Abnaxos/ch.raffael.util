@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -70,13 +70,16 @@ public abstract class AbstractPresentationBuilder<T extends Container> implement
         return this;
     }
 
-    private void init(@NotNull T target, @Nullable Action root, boolean setupTarget) {
+    @Override
+    @NotNull
+    public PresentationBuilder<T> init(@NotNull T target, @Nullable Action root, boolean setupTarget) {
         this.target = target;
         atBeginning = true;
         addSeparator = false;
         if ( setupTarget ) {
             setupTarget(target, root);
         }
+        return this;
     }
 
     protected abstract T createTarget(@Nullable Action action);
