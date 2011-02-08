@@ -1,11 +1,11 @@
 /*
- * Copyright 2010 Raffael Herzog
+ * Copyright 2011 Raffael Herzog
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,11 +24,13 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.util.concurrent.Callable;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
@@ -37,6 +39,9 @@ import javax.swing.text.JTextComponent;
 
 import org.slf4j.Logger;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListenableFutureTask;
 import com.jidesoft.plaf.LookAndFeelFactory;
 
 import ch.raffael.util.common.logging.LogUtil;
@@ -89,6 +94,35 @@ public class SwingUtil {
     public static void center(Component component, Component parent) {
         component.setLocation(parent.getX() + parent.getWidth() / 2 - component.getWidth() / 2,
                               parent.getY() + parent.getHeight() / 2 - component.getWidth() / 2);
+    }
+
+    public static <T> ListenableFuture<T> invokeInEventQueue(Callable<T> callable) {
+        if ( SwingUtilities.isEventDispatchThread() ) {
+            T result;
+            try {
+                result = callable.call();
+                return Futures.immediateFuture(result);
+            }
+            catch ( Exception e ) {
+                return Futures.immediateFailedFuture(e);
+            }
+        }
+        else {
+            ListenableFutureTask<T> future = new ListenableFutureTask<T>(callable);
+            SwingUtilities.invokeLater(future);
+            return future;
+        }
+    }
+
+    public static ListenableFuture<Void> invokeInEventQueue(Runnable runnable) {
+        if ( SwingUtilities.isEventDispatchThread() ) {
+            return Futures.immediateFuture(null);
+        }
+        else {
+            ListenableFutureTask<Void> future = new ListenableFutureTask<Void>(runnable, null);
+            SwingUtilities.invokeLater(future);
+            return future;
+        }
     }
 
     public static boolean invoke(Action action, Object source) {
