@@ -75,7 +75,7 @@ public final class MethodSignature {
             }
             buf.append(arg.getType().getName());
         }
-        buf.append(')');
+        buf.append(")>");
         return buf.toString();
     }
 

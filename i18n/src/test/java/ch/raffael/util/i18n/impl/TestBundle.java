@@ -71,7 +71,7 @@ public class TestBundle {
 
     @Test
     public void testParameter_de_CH() throws Exception {
-        I18N.setLocale(new Locale("de_CH"));
+        I18N.setLocale(new Locale("de", "CH"));
         assertEquals(res.parameter("Raffi"), "Raffi ist cool!");
     }
 
