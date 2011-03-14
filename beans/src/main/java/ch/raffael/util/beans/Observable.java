@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Raffael Herzog
+ * Copyright 2011 Raffael Herzog
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package ch.raffael.util.beans;
 
-import java.util.EventObject;
+import java.beans.PropertyChangeListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -24,15 +24,10 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class Event<T> extends EventObject {
+public interface Observable {
 
-    public Event(@NotNull T source) {
-        super(source);
-    }
+    void addPropertyChangeListener(PropertyChangeListener listener);
 
-    @SuppressWarnings({ "unchecked" })
-    @Override
-    public T getSource() {
-        return (T)super.getSource();
-    }
+    void removePropertyChangeListener(PropertyChangeListener listener);
+
 }

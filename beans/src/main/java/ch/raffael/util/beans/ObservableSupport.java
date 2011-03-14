@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Raffael Herzog
+ * Copyright 2011 Raffael Herzog
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,18 @@
 
 package ch.raffael.util.beans;
 
-import java.util.EventObject;
-
-import org.jetbrains.annotations.NotNull;
+import java.beans.PropertyChangeSupport;
 
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class Event<T> extends EventObject {
+public class ObservableSupport extends PropertyChangeSupport implements Observable {
 
-    public Event(@NotNull T source) {
-        super(source);
+    private static final long serialVersionUID = -7539551951005491649L;
+
+    public ObservableSupport(Object sourceBean) {
+        super(sourceBean);
     }
 
-    @SuppressWarnings({ "unchecked" })
-    @Override
-    public T getSource() {
-        return (T)super.getSource();
-    }
 }
