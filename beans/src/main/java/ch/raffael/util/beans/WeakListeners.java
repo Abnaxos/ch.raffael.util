@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.raffael.util.swing.beans;
+package ch.raffael.util.beans;
 
 import java.beans.BeanInfo;
 import java.beans.EventSetDescriptor;
@@ -71,32 +71,22 @@ public class WeakListeners {
     }
 
     public static Object addWeakListener(@NotNull ClassLoader loader, @NotNull final Object bean, @NotNull String eventSet, @NotNull Object listener) {
-        try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
-            for ( EventSetDescriptor evt : beanInfo.getEventSetDescriptors() ) {
-                if ( evt.getName().equals(eventSet) ) {
-                    if ( !evt.getListenerType().isInstance(listener) ) {
-                        throw new BeanException(listener + " does not implement " + evt.getListenerType().getName());
-                    }
-                    final Method removeMethod = evt.getRemoveListenerMethod();
-                    Object weakListener = Proxy.newProxyInstance(loader, new Class<?>[]{evt.getListenerType()},
-                                                                 new WeakInvocationHandler(bean, removeMethod));
-                    try {
-                        evt.getAddListenerMethod().invoke(bean, weakListener);
-                    }
-                    catch ( InvocationTargetException e ) {
-                        throw new BeanException("Error adding listener for " + eventSet + " to " + bean, e);
-                    }
-                    catch ( IllegalAccessException e ) {
-                        throw new BeanException("Error adding listener for " + eventSet + " to " + bean, e);
-                    }
-                    return weakListener;
-                }
-            }
-            throw new BeanException("No event set " + eventSet + " in class " + bean.getClass().getName());
+        EventSetDescriptor evt = BeanUtils.requireEventSetDescriptor(bean, eventSet);
+        if ( !evt.getListenerType().isInstance(listener) ) {
+            throw new BeanException(listener + " does not implement " + evt.getListenerType().getName());
         }
-        catch ( IntrospectionException e ) {
-            throw new BeanException("Error introspecting " + bean.getClass(), e);
+        try {
+            final Method removeMethod = evt.getRemoveListenerMethod();
+            Object weakListener = Proxy.newProxyInstance(loader, new Class<?>[] { evt.getListenerType() },
+                                                         new WeakInvocationHandler(bean, removeMethod));
+            evt.getAddListenerMethod().invoke(bean, weakListener);
+            return weakListener;
+        }
+        catch ( InvocationTargetException e ) {
+            throw new BeanException("Error adding listener for " + eventSet + " to " + bean, e);
+        }
+        catch ( IllegalAccessException e ) {
+            throw new BeanException("Error adding listener for " + eventSet + " to " + bean, e);
         }
     }
 
