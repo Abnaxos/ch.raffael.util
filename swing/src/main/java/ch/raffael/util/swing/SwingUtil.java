@@ -43,6 +43,8 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.jidesoft.plaf.LookAndFeelFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import ch.raffael.util.common.logging.LogUtil;
 
@@ -192,6 +194,38 @@ public class SwingUtil {
         }
         else if ( rect.y + rect.height > target.y + target.height ) {
             rect.y = target.y + target.height - rect.height;
+        }
+    }
+
+    @SuppressWarnings( { "unchecked" })
+    @Nullable 
+    public static <T> T findComponent(Component component, @NotNull Class<T> type) {
+        if ( component == null ) {
+            return null;
+        }
+        else if ( type.isInstance(component) ) {
+            return (T)component;
+        }
+        else {
+            return findComponent(component.getParent(), type);
+        }
+    }
+
+    @NotNull
+    public static <T> T requireComponent(Component component, @NotNull Class<T> type) {
+        T result = findComponent(component, type);
+        if ( result == null ) {
+            throw new IllegalStateException("No component extending/implementing " + type + " found from component " + component);
+        }
+        return result;
+    }
+
+    public static boolean isVisible(Component c) {
+        if ( c.getParent() == null || isVisible(c.getParent()) ) {
+            return c.isVisible();
+        }
+        else {
+            return false;
         }
     }
 

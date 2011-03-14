@@ -44,6 +44,7 @@
     <module>beans</module>
     <module>swing</module>
     <module>i18n</module>
+    <module>binding</module>
   </modules>
 
   <dependencies>
