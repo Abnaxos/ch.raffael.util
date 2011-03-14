@@ -45,6 +45,7 @@
     <module>swing</module>
     <module>i18n</module>
     <module>binding</module>
+    <module>demos</module>
   </modules>
 
   <dependencies>
