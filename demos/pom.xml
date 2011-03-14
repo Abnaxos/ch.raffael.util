@@ -25,12 +25,12 @@
   <groupId>ch.raffael.util</groupId>
   <artifactId>cru-demos</artifactId>
   <packaging>jar</packaging>
-  <version>1010.0-SNAPSHOT</version>
+  <version>1103.1-SNAPSHOT</version>
 
   <parent>
     <groupId>ch.raffael.util</groupId>
     <artifactId>cru-parent</artifactId>
-    <version>1010.0-SNAPSHOT</version>
+    <version>1103.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -43,12 +43,12 @@
     <dependency>
       <groupId>ch.raffael.util</groupId>
       <artifactId>cru-swing</artifactId>
-      <version>1010.0-SNAPSHOT</version>
+      <version>1103.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>ch.raffael.util</groupId>
       <artifactId>cru-binding</artifactId>
-      <version>1010.0-SNAPSHOT</version>
+      <version>1103.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.intellij</groupId>
