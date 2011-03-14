@@ -25,7 +25,7 @@
   <groupId>ch.raffael.util</groupId>
   <artifactId>cru-common</artifactId>
   <packaging>jar</packaging>
-  <version>1010.0-SNAPSHOT</version>
+  <version>1103.0</version>
 
   <name>ch.raffael.util.common</name>
   <description>
@@ -35,7 +35,7 @@
   <parent>
     <groupId>ch.raffael.util</groupId>
     <artifactId>cru-parent</artifactId>
-    <version>1010.0-SNAPSHOT</version>
+    <version>1103.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
