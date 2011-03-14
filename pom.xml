@@ -25,7 +25,7 @@
   <groupId>ch.raffael.util</groupId>
   <artifactId>cru-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1103.0</version>
+  <version>1103.1-SNAPSHOT</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>
