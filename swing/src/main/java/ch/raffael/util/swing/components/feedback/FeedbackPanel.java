@@ -243,7 +243,7 @@ public class FeedbackPanel extends JLayeredPane {
             if ( placement == null ) {
                 placement = defaultPlacement;
             }
-            feedback.prepare(placement);
+            feedback.prepare(component, placement);
             currentBounds.x = pos.x + placement.getXOffset(component.getWidth(), prefSize.width);
             currentBounds.y = pos.y + placement.getYOffset(component.getHeight(), prefSize.height);
             if ( location == null ) {
@@ -253,7 +253,7 @@ public class FeedbackPanel extends JLayeredPane {
                 location.x = currentBounds.x;
                 location.y = currentBounds.y;
             }
-            location = feedback.translate(location, placement);
+            location = feedback.translate(component, location, placement);
             currentBounds.setLocation(location);
             currentBounds.width = prefSize.width;
             currentBounds.height = prefSize.height;

@@ -32,6 +32,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -46,6 +47,8 @@ public class IconTextFeedback extends JPanel implements Feedback {
     private FeedbackPanel.Placement placement;
     protected final JLabel icon = new JLabel();
     protected final JLabel text = new JLabel();
+    private boolean ignoreBorders;
+
     private boolean mouseOver;
     private boolean focus;
 
@@ -159,16 +162,30 @@ public class IconTextFeedback extends JPanel implements Feedback {
         this.text.setText(text);
     }
 
+    public boolean isIgnoreBorders() {
+        return ignoreBorders;
+    }
+
+    public void setIgnoreBorders(boolean ignoreBorders) {
+        this.ignoreBorders = ignoreBorders;
+    }
+
     @Override
-    public void prepare(@NotNull FeedbackPanel.Placement placement) {
+    public void prepare(Component component, @NotNull FeedbackPanel.Placement placement) {
         setPlacement(placement);
     }
 
     @NotNull
     @Override
-    public Point translate(@NotNull Point reference, @NotNull FeedbackPanel.Placement placement) {
+    public Point translate(Component component, @NotNull Point reference, @NotNull FeedbackPanel.Placement placement) {
         if ( getIcon() != null ) {
             placement.translate(reference, -getIcon().getIconWidth() / 2, getIcon().getIconHeight() / 2);
+            if ( !ignoreBorders && (component instanceof JComponent) ) {
+                Insets insets = ((JComponent)component).getInsets();
+                placement.translate(reference,
+                                    placement.isLeft() ? insets.left : insets.right,
+                                    placement.isTop() ? insets.top: insets.bottom);
+            }
         }
         return reference;
     }

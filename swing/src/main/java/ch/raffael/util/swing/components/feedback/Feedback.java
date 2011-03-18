@@ -29,9 +29,9 @@ public interface Feedback {
 
     FeedbackPanel.Placement getPlacement();
 
-    void prepare(@NotNull FeedbackPanel.Placement placement);
+    void prepare(Component component, @NotNull FeedbackPanel.Placement placement);
     @NotNull
-    Point translate(@NotNull Point reference, @NotNull FeedbackPanel.Placement placement);
+    Point translate(Component component, @NotNull Point reference, @NotNull FeedbackPanel.Placement placement);
 
     void attach(Component component);
     void detach(Component component);
