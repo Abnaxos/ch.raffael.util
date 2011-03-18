@@ -17,6 +17,9 @@
 package ch.raffael.util.swing.components.feedback;
 
 import java.awt.Component;
+import java.awt.Point;
+
+import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -26,8 +29,9 @@ public interface Feedback {
 
     FeedbackPanel.Placement getPlacement();
 
-    int getXOverlap();
-    int getYOverlap();
+    void prepare(@NotNull FeedbackPanel.Placement placement);
+    @NotNull
+    Point translate(@NotNull Point reference, @NotNull FeedbackPanel.Placement placement);
 
     void attach(Component component);
     void detach(Component component);

@@ -16,11 +16,9 @@
 
 package ch.raffael.util.swing.components.feedback;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.LayoutManager2;
 import java.awt.Point;
@@ -38,6 +36,8 @@ import java.util.Map;
 import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
 
+import org.jetbrains.annotations.NotNull;
+
 import ch.raffael.util.swing.SwingUtil;
 
 
@@ -48,6 +48,7 @@ public class FeedbackPanel extends JLayeredPane {
 
     private Component content;
     private final Map<Component, Tracker> trackers = new IdentityHashMap<Component, Tracker>();
+    private Placement defaultPlacement = Placement.BOTTOM_RIGHT;
 
     public FeedbackPanel() {
         setLayout(new ContentLayoutManager());
@@ -63,6 +64,14 @@ public class FeedbackPanel extends JLayeredPane {
             }
         });
         //setDoubleBuffered(true);
+    }
+
+    public Placement getDefaultPlacement() {
+        return defaultPlacement;
+    }
+
+    public void setDefaultPlacement(Placement defaultPlacement) {
+        this.defaultPlacement = defaultPlacement;
     }
 
     @Override
@@ -83,6 +92,7 @@ public class FeedbackPanel extends JLayeredPane {
         super.addImpl(comp, POPUP_LAYER, -1);
         Tracker tracker = new Tracker((Component)constraints, comp);
         trackers.put(comp, tracker);
+        tracker.reposition();
     }
 
     @Override
@@ -201,6 +211,7 @@ public class FeedbackPanel extends JLayeredPane {
         private final Component feedbackComponent;
         private Rectangle prevBounds = null;
         private Rectangle currentBounds = new Rectangle();
+        private Point location = null;
 
         private Tracker(Component component, Component feedbackComponent) {
             this.component = component;
@@ -231,8 +242,21 @@ public class FeedbackPanel extends JLayeredPane {
             Dimension prefSize = feedbackComponent.getPreferredSize();
             Feedback feedback = (Feedback)feedbackComponent;
             Placement placement = feedback.getPlacement();
-            currentBounds.x = pos.x + placement.getXOffset(component.getWidth(), prefSize.width, feedback.getXOverlap());
-            currentBounds.y = pos.y + placement.getYOffset(component.getHeight(), prefSize.height, feedback.getYOverlap());
+            if ( placement == null ) {
+                placement = defaultPlacement;
+            }
+            feedback.prepare(placement);
+            currentBounds.x = pos.x + placement.getXOffset(component.getWidth(), prefSize.width);
+            currentBounds.y = pos.y + placement.getYOffset(component.getHeight(), prefSize.height);
+            if ( location == null ) {
+                location = currentBounds.getLocation();
+            }
+            else {
+                location.x = currentBounds.x;
+                location.y = currentBounds.y;
+            }
+            location = feedback.translate(location, placement);
+            currentBounds.setLocation(location);
             currentBounds.width = prefSize.width;
             currentBounds.height = prefSize.height;
             //Graphics graphics = getGraphics();
@@ -250,7 +274,7 @@ public class FeedbackPanel extends JLayeredPane {
                 }
                 feedbackComponent.setBounds(currentBounds);
             }
-        }
+            }
 
         @Override
         public void hierarchyChanged(HierarchyEvent e) {
@@ -296,46 +320,46 @@ public class FeedbackPanel extends JLayeredPane {
     public static enum Placement {
         TOP_LEFT(true, true) {
             @Override
-            public int getXOffset(int componentWidth, int feedbackWidth, int overlap) {
-                return -overlap;
+            public int getXOffset(int componentWidth, int feedbackWidth) {
+                return 0;
             }
 
             @Override
-            public int getYOffset(int componentHeight, int feedbackHeight, int overlap) {
-                return -feedbackHeight + overlap;
+            public int getYOffset(int componentHeight, int feedbackHeight) {
+                return -feedbackHeight;
             }
         },
         TOP_RIGHT(false, true) {
             @Override
-            protected int getXOffset(int componentWidth, int feedbackWidth, int overlap) {
-                return componentWidth - feedbackWidth + overlap;
+            protected int getXOffset(int componentWidth, int feedbackWidth) {
+                return componentWidth - feedbackWidth;
             }
 
             @Override
-            protected int getYOffset(int componentHeight, int feedbackHeight, int overlap) {
-                return -feedbackHeight + overlap;
+            protected int getYOffset(int componentHeight, int feedbackHeight) {
+                return -feedbackHeight;
             }
         },
         BOTTOM_LEFT(true, false) {
             @Override
-            protected int getXOffset(int componentWidth, int feedbackWidth, int overlap) {
-                return -overlap;
+            protected int getXOffset(int componentWidth, int feedbackWidth) {
+                return 0;
             }
 
             @Override
-            protected int getYOffset(int componentHeight, int feedbackHeight, int overlap) {
-                return componentHeight - overlap;
+            protected int getYOffset(int componentHeight, int feedbackHeight) {
+                return componentHeight;
             }
         },
         BOTTOM_RIGHT(false, false) {
             @Override
-            protected int getXOffset(int componentWidth, int feedbackWidth, int overlap) {
-                return componentWidth - feedbackWidth + overlap;
+            protected int getXOffset(int componentWidth, int feedbackWidth) {
+                return componentWidth - feedbackWidth;
             }
 
             @Override
-            protected int getYOffset(int componentHeight, int feedbackHeight, int overlap) {
-                return componentHeight - overlap;
+            protected int getYOffset(int componentHeight, int feedbackHeight) {
+                return componentHeight;
             }
         },;
 
@@ -355,9 +379,32 @@ public class FeedbackPanel extends JLayeredPane {
             return isTop;
         }
 
-        protected abstract int getXOffset(int componentWidth, int feedbackWidth, int overlap);
+        protected abstract int getXOffset(int componentWidth, int feedbackWidth);
 
-        protected abstract int getYOffset(int componentHeight, int feedbackHeight, int overlap);
+        protected abstract int getYOffset(int componentHeight, int feedbackHeight);
+
+        public void translate(@NotNull Point point, int dx, int dy) {
+            point.x = translateX(point.x, dx);
+            point.y = translateY(point.y, dy);
+        }
+        
+        public int translateX(int x, int delta) {
+            if ( isLeft() ) {
+                return x + delta;
+            }
+            else {
+                return x - delta;
+            }
+        }
+        public int translateY(int y, int delta) {
+            if ( isTop() ) {
+                return y + delta;
+            }
+            else {
+                return y - delta;
+            }
+        }
+
     }
     
 }

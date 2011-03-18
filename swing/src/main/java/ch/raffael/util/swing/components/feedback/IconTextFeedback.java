@@ -22,6 +22,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager2;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -33,6 +34,8 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -118,6 +121,7 @@ public class IconTextFeedback extends JPanel implements Feedback {
         text.setVisible(mouseOver || focus);
     }
 
+    @NotNull
     public FeedbackPanel.Placement getPlacement() {
         return placement;
     }
@@ -156,23 +160,17 @@ public class IconTextFeedback extends JPanel implements Feedback {
     }
 
     @Override
-    public int getXOverlap() {
-        if ( getIcon() == null ) {
-            return 0;
-        }
-        else {
-            return getIcon().getIconWidth() / 2;
-        }
+    public void prepare(@NotNull FeedbackPanel.Placement placement) {
+        setPlacement(placement);
     }
 
+    @NotNull
     @Override
-    public int getYOverlap() {
-        if ( getIcon() == null ) {
-            return 0;
+    public Point translate(@NotNull Point reference, @NotNull FeedbackPanel.Placement placement) {
+        if ( getIcon() != null ) {
+            placement.translate(reference, -getIcon().getIconWidth() / 2, getIcon().getIconHeight() / 2);
         }
-        else {
-            return getIcon().getIconHeight() / 2;
-        }
+        return reference;
     }
 
     private class IconTextLayout implements LayoutManager2 {
