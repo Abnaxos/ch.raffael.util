@@ -18,6 +18,7 @@ package ch.raffael.util.binding;
 
 import ch.raffael.util.binding.Binding;
 import ch.raffael.util.binding.PresentationModel;
+import ch.raffael.util.binding.validate.ValidationListener;
 import ch.raffael.util.binding.validate.ValidationResult;
 
 
@@ -30,6 +31,9 @@ public interface Adapter<B, T> {
 
     T getTarget();
 
-    void validate(ValidationResult result);
+    void addValidationListener(ValidationListener listener);
+    void removeValidationListener(ValidationListener listener);
+
+    void validate();
 
 }

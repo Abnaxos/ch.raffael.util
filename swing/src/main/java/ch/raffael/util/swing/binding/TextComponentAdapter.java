@@ -28,10 +28,14 @@ import javax.swing.text.JTextComponent;
 
 import org.jetbrains.annotations.NotNull;
 
+import ch.raffael.util.beans.EventEmitter;
 import ch.raffael.util.binding.Adapter;
 import ch.raffael.util.binding.Binding;
 import ch.raffael.util.binding.PresentationModel;
 import ch.raffael.util.binding.util.BindingTracker;
+import ch.raffael.util.binding.validate.DefaultValidationResult;
+import ch.raffael.util.binding.validate.ValidationEvent;
+import ch.raffael.util.binding.validate.ValidationListener;
 import ch.raffael.util.binding.validate.ValidationResult;
 import ch.raffael.util.binding.validate.Validator;
 
@@ -43,7 +47,6 @@ public class TextComponentAdapter implements Adapter<String, JTextComponent> {
 
     private UpdateStrategy updateStrategy = UpdateStrategy.IMMEDIATE;
     private JTextComponent component;
-    private PresentationModel model;
     private final BindingTracker<String> binding = new BindingTracker<String>() {
         @Override
         public void update(String newValue) {
@@ -52,16 +55,27 @@ public class TextComponentAdapter implements Adapter<String, JTextComponent> {
             }
         }
     };
+    private EventEmitter<ValidationListener> validationEvents = EventEmitter.newEmitter(ValidationListener.class);
     private Validator<String> validator;
+    private DefaultValidationResult validationStatus;
 
     private ImmediateUpdateHandler immediateUpdateHandler = null;
     private FocusUpdateHandler focusUpdateHandler = null;
 
-    public TextComponentAdapter install(@NotNull JTextComponent component, @NotNull PresentationModel model, @NotNull Binding<String> binding) {
+    public TextComponentAdapter install(@NotNull JTextComponent component, @NotNull Binding<String> binding) {
         setComponent(component);
-        setModel(model);
         setBinding(binding);
         return this;
+    }
+
+    @Override
+    public void addValidationListener(ValidationListener listener) {
+        validationEvents.addListener(listener);
+    }
+
+    @Override
+    public void removeValidationListener(ValidationListener listener) {
+        validationEvents.removeListener(listener);
     }
 
     public JTextComponent getComponent() {
@@ -99,27 +113,32 @@ public class TextComponentAdapter implements Adapter<String, JTextComponent> {
         }
     }
 
-    public PresentationModel getModel() {
-        return model;
-    }
-
-    public void setModel(PresentationModel model) {
-        this.model = model;
-    }
-
     public Binding<String> getBinding() {
         return binding.getBinding();
     }
 
+    public void setBinding(Binding<String> binding) {
+        this.binding.setBinding(binding);
+    }
+
     @Override
-    public void validate(ValidationResult result) {
+    public void validate() {
+        DefaultValidationResult oldStatus = validationStatus;
+        validationStatus = new DefaultValidationResult();
         if ( validator != null ) {
-            validator.validate(component==null?null:component.getText(), result);
+            validator.validate(component == null ? null : component.getText(), validationStatus);
+        }
+        if ( !validationEvents.isEmpty() ) {
+            validationStatus.fireEvent(validationEvents.emitter(), oldStatus, this, component);
         }
     }
 
-    public void setBinding(Binding<String> binding) {
-        this.binding.setBinding(binding);
+    public Validator<String> getValidator() {
+        return validator;
+    }
+
+    public void setValidator(Validator<String> validator) {
+        this.validator = validator;
     }
 
     private ImmediateUpdateHandler immediateUpdateHandler() {
@@ -180,6 +199,7 @@ public class TextComponentAdapter implements Adapter<String, JTextComponent> {
         }
 
         private void documentUpdate() {
+            validate();
             binding.set(component.getText());
         }
     }
@@ -204,6 +224,7 @@ public class TextComponentAdapter implements Adapter<String, JTextComponent> {
 
         @Override
         public void focusLost(FocusEvent e) {
+            validate();
             binding.set(component.getText());
         }
     }

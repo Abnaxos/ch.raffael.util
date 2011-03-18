@@ -19,17 +19,22 @@ package ch.raffael.util.binding.validate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+
 
 /**
 * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
 */
 class ValidationResultBuffer extends AbstractValidationResult {
 
-    private Set<Message> messages = new LinkedHashSet<Message>();
+    private Set<Message> messages = null;
     private Message.Severity didAdd = null;
 
     @Override
     public void add(Message message) {
+        if ( messages == null ) {
+            messages = Sets.newLinkedHashSet();
+        }
         messages.add(message);
         if ( didAdd == null || didAdd.compareTo(message.getSeverity()) > 1 ) {
             didAdd = message.getSeverity();
@@ -49,9 +54,11 @@ class ValidationResultBuffer extends AbstractValidationResult {
     }
 
     public void flush(ValidationResult to, Message.Severity threshold) {
-        for ( Message msg : messages ) {
-            if ( threshold == null || threshold.compareTo(msg.getSeverity()) <= 0 ) {
-                to.add(msg);
+        if ( messages != null ) {
+            for ( Message msg : messages ) {
+                if ( threshold == null || threshold.compareTo(msg.getSeverity()) <= 0 ) {
+                    to.add(msg);
+                }
             }
         }
     }

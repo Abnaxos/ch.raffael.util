@@ -232,13 +232,11 @@ public class FeedbackPanel extends JLayeredPane {
 
         private void updateVisibility() {
             boolean visible = SwingUtil.isVisible(component);
-            System.out.println("Visible: " + visible);
             feedbackComponent.setVisible(visible);
         }
 
         private void reposition() {
             Point pos = SwingUtilities.convertPoint(component, 0, 0, FeedbackPanel.this);
-            //System.out.println(getWidth() + " / " + getPreferredSize().width);
             Dimension prefSize = feedbackComponent.getPreferredSize();
             Feedback feedback = (Feedback)feedbackComponent;
             Placement placement = feedback.getPlacement();
@@ -259,13 +257,7 @@ public class FeedbackPanel extends JLayeredPane {
             currentBounds.setLocation(location);
             currentBounds.width = prefSize.width;
             currentBounds.height = prefSize.height;
-            //Graphics graphics = getGraphics();
-            //if ( graphics != null ) {
-            //    graphics.setColor(Color.BLACK);
-            //    graphics.fillRect(0, 0, getWidth(), getHeight());
-            //}
             if ( !currentBounds.equals(prevBounds) ) {
-                System.out.println(currentBounds + "/" + prefSize);
                 if ( prevBounds == null ) {
                     prevBounds = new Rectangle(currentBounds);
                 }

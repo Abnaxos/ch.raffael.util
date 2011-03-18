@@ -16,22 +16,22 @@
 
 package ch.raffael.util.binding;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
 import org.jetbrains.annotations.NotNull;
 
 import ch.raffael.util.beans.EventEmitter;
 import ch.raffael.util.beans.ObservableSupport;
 import ch.raffael.util.beans.PropertyChangeForwarder;
 import ch.raffael.util.binding.validate.Message;
-import ch.raffael.util.binding.validate.ValidationMessageEvent;
-import ch.raffael.util.binding.validate.ValidationMessageListener;
+import ch.raffael.util.binding.validate.ValidationEvent;
+import ch.raffael.util.binding.validate.ValidationListener;
 
 
 /**
@@ -45,15 +45,26 @@ public class PresentationModel {
 
     private final ObservableSupport observableSupport = new ObservableSupport(this);
     private final Map<Object, Binding> keyedBindings = new HashMap<Object, Binding>();
+    private final Set<Adapter<?, ?>> adapters = new HashSet<Adapter<?, ?>>();
     private BufferGroup bufferGroup;
 
     private PropertyChangeForwarder bufferPropertyForwarder;
 
-    private final EventEmitter<ValidationMessageListener> validationMessageListeners
-            = EventEmitter.newEmitter(ValidationMessageListener.class);
-    private final Multimap<Object, Message> validationMessages = LinkedHashMultimap.create();
+    private final SetMultimap<Object, Message> validationMessages = LinkedHashMultimap.create();
     private int warningCount = 0;
     private int errorCount = 0;
+
+    private final ValidationListener validationEvents = new ValidationListener() {
+        @Override
+        public void validationChanged(ValidationEvent event) {
+            validationMessages.replaceValues(event.getSubject(), event.getMessages());
+            validationUpdate();
+            if ( !validationListeners.isEmpty() ) {
+                validationListeners.emitter().validationChanged(new ValidationEvent(this, event.getSubject(), event.getMessages(), event.getAddedMessages(), event.getRemovedMessages()));
+            }
+        }
+    };
+    private final EventEmitter<ValidationListener> validationListeners = EventEmitter.newEmitter(ValidationListener.class);
 
     private Binding<Integer> warningCountBinding = null;
     private Binding<Integer> errorCountBinding = null;
@@ -64,12 +75,12 @@ public class PresentationModel {
     }
 
 
-    public void addValidationMessageListener(ValidationMessageListener listener) {
-        validationMessageListeners.addListener(listener);
+    public void addValidationListener(ValidationListener listener) {
+        validationListeners.addListener(listener);
     }
 
-    public void removeValidationMessageListener(ValidationMessageListener listener) {
-        validationMessageListeners.addListener(listener);
+    public void removeValidationMessageListener(ValidationListener listener) {
+        validationListeners.addListener(listener);
     }
 
     @NotNull
@@ -91,13 +102,19 @@ public class PresentationModel {
         // maybe more at some point
     }
 
-    public void add(@NotNull Object key, @NotNull Binding binding) {
+    public void add(@NotNull Object key, @NotNull Binding<?> binding) {
         add(binding);
         keyedBindings.put(key, binding);
     }
 
     public void addBuffer(@NotNull Buffer buffer) {
         bufferGroup.add(buffer);
+    }
+
+    public void addAdapter(@NotNull Adapter<?, ?> adapter) {
+        if ( adapters.add(adapter) ) {
+            adapter.addValidationListener(validationEvents);
+        }
     }
 
     public Binding<?> getBinding(@NotNull Object key) {
@@ -120,7 +137,9 @@ public class PresentationModel {
     }
 
     public void validate() {
-
+        for ( Adapter<?, ?> adapter : adapters ) {
+            adapter.validate();
+        }
     }
 
     public int getWarningCount() {
@@ -156,45 +175,11 @@ public class PresentationModel {
         return validBinding;
     }
 
-    public void addValidationMessage(Object subject, @NotNull Message message) {
-        // FIXME: null subjects?
-        if ( validationMessages.put(subject, message) ) {
-            validationMessageListeners.emitter().validationMessageAdded(new ValidationMessageEvent(this, subject, message));
-        }
-        valdiationUpdate();
+    public SetMultimap<Object, Message> getValidationMessages() {
+        return Multimaps.unmodifiableSetMultimap(validationMessages);
     }
 
-    public void setValidationMessages(Object subject, @NotNull Collection<Message> messages) {
-        // FIXME: null subjects?
-        clearValidationMessages(subject);
-        if ( validationMessages.putAll(subject, messages) ) {
-            for ( Message msg : messages ) {
-                // FIXME: may lead to duplicate events because of Collection<Message>
-                validationMessageListeners.emitter().validationMessageAdded(new ValidationMessageEvent(this, subject, msg));
-            }
-        }
-        valdiationUpdate();
-    }
-
-    public void clearValidationMessages(Object subject) {
-        // FIXME: null subjects?
-        Collection<Message> removed = validationMessages.removeAll(subject);
-        for ( Message msg : removed ) {
-            validationMessageListeners.emitter().validationMessageRemoved(new ValidationMessageEvent(this, subject, msg));
-        }
-        valdiationUpdate();
-    }
-
-    public void clearValidationMessages() {
-        List<Map.Entry<Object, Message>> entries = new ArrayList<Map.Entry<Object, Message>>(validationMessages.entries());
-        validationMessages.clear();
-        for ( Map.Entry<Object, Message> entry : entries ) {
-            validationMessageListeners.emitter().validationMessageRemoved(new ValidationMessageEvent(this, entry.getKey(), entry.getValue()));
-        }
-        valdiationUpdate();
-    }
-
-    private void valdiationUpdate() {
+    private void validationUpdate() {
         int oldWarningCount = warningCount;
         int oldErrorCount = errorCount;
         warningCount = 0;

@@ -16,6 +16,9 @@
 
 package ch.raffael.util.binding.validate;
 
+import java.util.Collection;
+
+
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */

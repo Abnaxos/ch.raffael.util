@@ -114,7 +114,25 @@ public final class Message {
     }
 
     public static enum Severity {
-        WARNING, ERROR
+        WARNING{
+            @Override
+            public Message message(String msg, Object details) {
+                return warning(msg, details);
+            }
+        },
+        ERROR {
+            @Override
+            public Message message(String msg, Object details) {
+                return error(msg, details);
+            }
+        };
+
+        public Message message(String msg) {
+            return message(msg, null);
+        }
+
+        public abstract Message message(String msg, Object details);
+
     }
 
 }

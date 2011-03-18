@@ -27,7 +27,7 @@ public class NotEmptyValidator implements Validator<String> {
 
     @Override
     public void validate(String value, ValidationResult result) {
-        if ( value != null && !value.isEmpty() ) {
+        if ( value == null || value.isEmpty() ) {
             result.addError("Value is required");
         }
     }
