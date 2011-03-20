@@ -19,19 +19,15 @@ package ch.raffael.util.binding;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import com.google.common.base.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import ch.raffael.util.beans.ObservableSupport;
-import ch.raffael.util.beans.PropertyChangeForwarder;
 
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public abstract class AbstractChainedBinding<T, S> implements Binding<T> {
-
-    public static final String PROPERTY_SOURCE = "source";
+public abstract class AbstractChainedBinding<T, S> implements ChainedBinding<T,S> {
 
     protected final ObservableSupport observableSupport = new ObservableSupport(this);
     private final PropertyChangeListener sourceObserver = new PropertyChangeListener() {
@@ -74,12 +70,14 @@ public abstract class AbstractChainedBinding<T, S> implements Binding<T> {
         observableSupport.removePropertyChangeListener(listener);
     }
 
+    @Override
     public Binding<S> getSource() {
         return source;
     }
 
+    @Override
     public void setSource(Binding<S> source) {
-        if ( !BindingUtils.equal(this.source, source) ) {
+        if ( !Bindings.equal(this.source, source) ) {
             if ( this.source != null ) {
                 this.source.removePropertyChangeListener(sourceObserver);
             }

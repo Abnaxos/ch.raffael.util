@@ -20,7 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import ch.raffael.util.binding.Binding;
-import ch.raffael.util.binding.BindingUtils;
+import ch.raffael.util.binding.Bindings;
 
 
 /**
@@ -67,7 +67,7 @@ public abstract class BindingTracker<T> implements PropertyChangeListener {
     }
 
     public void update() {
-        update(BindingUtils.getValue(binding));
+        update(Bindings.getValue(binding));
     }
     
     public abstract void update(T newValue);

@@ -53,7 +53,7 @@ public class AbstractGuard<T> implements Binding<T> {
     }
 
     public void setGuarded(Binding<T> guarded) {
-        if ( !BindingUtils.equal(this.guarded, guarded) ) {
+        if ( !Bindings.equal(this.guarded, guarded) ) {
             T oldValue = null;
             if ( this.guarded != null ) {
                 this.guarded.removePropertyChangeListener(guardedListener);
@@ -71,11 +71,11 @@ public class AbstractGuard<T> implements Binding<T> {
 
     @Override
     public T getValue() {
-        return BindingUtils.getValue(guarded);
+        return Bindings.getValue(guarded);
     }
 
     @Override
     public void setValue(T value) {
-        BindingUtils.setValue(guarded, value);
+        Bindings.setValue(guarded, value);
     }
 }

@@ -28,9 +28,9 @@ import ch.raffael.util.common.UnreachableCodeException;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class BindingUtils {
+public class Bindings {
 
-    private BindingUtils() {
+    private Bindings() {
     }
 
     @Nullable

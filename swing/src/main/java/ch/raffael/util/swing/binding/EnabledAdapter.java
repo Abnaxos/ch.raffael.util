@@ -6,7 +6,7 @@ import java.beans.PropertyChangeListener;
 
 import ch.raffael.util.binding.Adapter;
 import ch.raffael.util.binding.Binding;
-import ch.raffael.util.binding.BindingUtils;
+import ch.raffael.util.binding.Bindings;
 import ch.raffael.util.binding.validate.ValidationListener;
 
 
@@ -81,7 +81,7 @@ public class EnabledAdapter implements Adapter<Boolean, Component> {
 
     private void update() {
         if ( target != null ) {
-            Boolean enabled = BindingUtils.getValue(binding);
+            Boolean enabled = Bindings.getValue(binding);
             target.setEnabled(enabled == null ? false : enabled);
         }
     }

@@ -19,15 +19,13 @@ package ch.raffael.util.binding;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import com.google.common.base.Objects;
-
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class BufferedBinding<T> extends AbstractBufferedBinding<T> {
+public class BufferedBinding<T> extends AbstractBufferedBinding<T> implements ChainedBinding<T, T> {
 
-    private Binding<T> binding;
+    private Binding<T> source;
     private final PropertyChangeListener listener = new PropertyChangeListener() {
         @SuppressWarnings( { "unchecked" })
         @Override
@@ -41,40 +39,43 @@ public class BufferedBinding<T> extends AbstractBufferedBinding<T> {
     public BufferedBinding() {
     }
 
-    public BufferedBinding(Binding<T> binding) {
-        setBinding(binding);
+    public BufferedBinding(Binding<T> source) {
+        setSource(source);
     }
 
-    public Binding getBinding() {
-        return binding;
+    public Binding<T> getSource() {
+        return source;
     }
 
-    public void setBinding(Binding<T> binding) {
-        if ( this.binding != null ) {
-            this.binding.removePropertyChangeListener(listener);
+    public void setSource(Binding<T> source) {
+        if ( !Bindings.equal(this.source, source) ) {
+            Binding<T> oldValue = this.source;
+            if ( oldValue != null ) {
+                oldValue.removePropertyChangeListener(listener);
+            }
+            this.source = source;
+            if ( source != null ) {
+                source.addPropertyChangeListener(listener);
+            }
+            observableSupport.firePropertyChange(PROPERTY_SOURCE, oldValue, source);
+            // FIXME: update or reset?
+            reset(Bindings.getValue(source));
         }
-        this.binding = binding;
-        if ( this.binding != null ) {
-            this.binding.addPropertyChangeListener(listener);
-        }
-        // FIXME: update or reset?
-        reset(BindingUtils.getValue(binding));
-        //setValue(BindingUtils.getValue(binding));
     }
 
     @Override
     public void flush() {
-        reset(BindingUtils.getValue(binding));
+        reset(Bindings.getValue(source));
     }
 
     @Override
     public void commit() {
-        if ( binding == null ) {
+        if ( source == null ) {
             reset(null);
         }
         else {
-            binding.setValue(getValue());
-            reset(binding.getValue());
+            source.setValue(getValue());
+            reset(source.getValue());
         }
     }
 }

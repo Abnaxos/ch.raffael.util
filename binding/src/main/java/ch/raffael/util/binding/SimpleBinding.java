@@ -18,8 +18,6 @@ package ch.raffael.util.binding;
 
 import java.beans.PropertyChangeListener;
 
-import org.jetbrains.annotations.NotNull;
-
 import ch.raffael.util.beans.ObservableSupport;
 
 
@@ -55,7 +53,7 @@ public class SimpleBinding<T> implements Binding<T> {
 
     @Override
     public void setValue(T value) {
-        if ( !BindingUtils.equal(this.value, value, true) ) {
+        if ( !Bindings.equal(this.value, value, true) ) {
             T oldValue = this.value;
             this.value = value;
             valueChanged(oldValue, value);

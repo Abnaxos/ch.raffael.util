@@ -18,8 +18,6 @@ package ch.raffael.util.binding;
 
 import java.beans.PropertyChangeListener;
 
-import org.jetbrains.annotations.NotNull;
-
 import ch.raffael.util.beans.ObservableSupport;
 
 
@@ -49,7 +47,7 @@ public abstract class AbstractBufferedBinding<T> implements Binding<T>, Buffer {
 
     @Override
     public void setValue(T value) {
-        if ( !BindingUtils.equal(this.value, value, true) ) {
+        if ( !Bindings.equal(this.value, value, true) ) {
             Object oldValue = this.value;
             this.value = value;
             observableSupport.firePropertyChange(PROPERTY_VALUE, oldValue, value);
@@ -59,7 +57,7 @@ public abstract class AbstractBufferedBinding<T> implements Binding<T>, Buffer {
 
     protected void updateBuffering() {
         boolean oldBuffering = buffering;
-        buffering = !BindingUtils.equal(this.value, original, true);
+        buffering = !Bindings.equal(this.value, original, true);
         observableSupport.firePropertyChange(PROPERTY_BUFFERING, oldBuffering, buffering);
     }
 
@@ -68,7 +66,7 @@ public abstract class AbstractBufferedBinding<T> implements Binding<T>, Buffer {
     }
 
     protected boolean update(T original) {
-        if ( !BindingUtils.equal(this.original, original, true) ) {
+        if ( !Bindings.equal(this.original, original, true) ) {
             this.original = original;
             updateBuffering();
             return true;

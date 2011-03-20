@@ -108,7 +108,7 @@ public class TestBufferedBinding {
         SimpleBinding<String> newBinding = new SimpleBinding<String>("New Binding");
         assertEquals(buffer.getValue(), "Old Binding", "old binding's value");
         assertFalse(buffer.isBuffering(), "not buffering");
-        buffer.setBinding(newBinding);
+        buffer.setSource(newBinding);
         assertEquals(buffer.getValue(), "New Binding", "new binding's value");
         assertFalse(buffer.isBuffering(), "not buffering");
         EasyMock.verify(bufListener);
@@ -130,7 +130,7 @@ public class TestBufferedBinding {
         assertFalse(buffer.isBuffering(), "not buffering");
         buffer.setValue("Buffered");
         assertTrue(buffer.isBuffering(), "buffering after change");
-        buffer.setBinding(newBinding);
+        buffer.setSource(newBinding);
         assertEquals(buffer.getValue(), "New Binding", "new binding's value");
         assertFalse(buffer.isBuffering(), "not buffering after change");
         EasyMock.verify(bufListener);
