@@ -25,7 +25,7 @@
   <groupId>ch.raffael.util</groupId>
   <artifactId>cru-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1103.1-SNAPSHOT</version>
+  <version>1105-SNAPSHOT</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>
@@ -100,7 +100,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>r08</version>
+        <version>r09</version>
         <type>jar</type>
         <scope>compile</scope>
       </dependency>
