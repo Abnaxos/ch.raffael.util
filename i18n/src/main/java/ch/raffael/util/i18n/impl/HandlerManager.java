@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.KeyStroke;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +34,7 @@ import ch.raffael.util.i18n.impl.handlers.ByteArrayHandler;
 import ch.raffael.util.i18n.impl.handlers.IconHandler;
 import ch.raffael.util.i18n.impl.handlers.ImageHandler;
 import ch.raffael.util.i18n.impl.handlers.InputStreamHandler;
+import ch.raffael.util.i18n.impl.handlers.KeyStrokeHandler;
 import ch.raffael.util.i18n.impl.handlers.StringHandler;
 
 
@@ -54,6 +56,7 @@ public class HandlerManager {
         h.put(ImageIcon.class, h.get(Icon.class));
         h.put(InputStream.class, new InputStreamHandler());
         h.put(byte[].class, new ByteArrayHandler());
+        h.put(KeyStroke.class, new KeyStrokeHandler());
         //h.put(Color.class, null);
         // FIXME: sound
         handlers = h; // JMM: assignment to final field guarantees visibility of the map's contents

@@ -24,6 +24,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import ch.raffael.util.beans.EventEmitter;
+import ch.raffael.util.i18n.ResourceBundle;
 
 
 /**
@@ -64,6 +65,14 @@ public abstract class CommonToggleAction extends CommonAction implements ToggleA
 
     public CommonToggleAction(String name, Icon icon, KeyStroke accelerator, boolean enabled) {
         super(name, icon, accelerator, enabled);
+    }
+
+    protected CommonToggleAction(ResourceBundle resources, String baseName) {
+        super(resources, baseName);
+    }
+
+    protected CommonToggleAction(ResourceBundle resources, String baseName, boolean enabled) {
+        super(resources, baseName, enabled);
     }
 
     @Override

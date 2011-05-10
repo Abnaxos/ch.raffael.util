@@ -26,6 +26,7 @@ import javax.swing.Icon;
 import javax.swing.KeyStroke;
 
 import ch.raffael.util.beans.EventEmitter;
+import ch.raffael.util.i18n.ResourceBundle;
 
 
 /**
@@ -66,6 +67,14 @@ public class CommonActionGroup extends CommonAction implements ActionGroup {
 
     public CommonActionGroup(String name, Icon icon, KeyStroke accelerator, boolean enabled) {
         super(name, icon, accelerator, enabled);
+    }
+
+    public CommonActionGroup(ResourceBundle resources, String baseName) {
+        super(resources, baseName);
+    }
+
+    public CommonActionGroup(ResourceBundle resources, String baseName, boolean enabled) {
+        super(resources, baseName, enabled);
     }
 
     @Override

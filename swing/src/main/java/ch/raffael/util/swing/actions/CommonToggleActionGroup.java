@@ -28,6 +28,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import ch.raffael.util.beans.EventEmitter;
+import ch.raffael.util.i18n.ResourceBundle;
 
 
 /**
@@ -89,6 +90,14 @@ public class CommonToggleActionGroup extends CommonActionGroup implements Toggle
 
     public CommonToggleActionGroup(String name, Icon icon, KeyStroke accelerator, boolean enabled) {
         super(name, icon, accelerator, enabled);
+    }
+
+    public CommonToggleActionGroup(ResourceBundle resources, String baseName) {
+        super(resources, baseName);
+    }
+
+    public CommonToggleActionGroup(ResourceBundle resources, String baseName, boolean enabled) {
+        super(resources, baseName, enabled);
     }
 
     @Override
