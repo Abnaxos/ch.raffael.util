@@ -79,6 +79,9 @@ public abstract class AbstractPresentationBuilder<T extends Container> implement
         if ( setupTarget ) {
             setupTarget(target, root);
         }
+        if ( root instanceof ActionGroup ) {
+            add(((ActionGroup)root).getActions());
+        }
         return this;
     }
 
