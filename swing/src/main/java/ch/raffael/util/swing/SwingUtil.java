@@ -16,6 +16,7 @@
 
 package ch.raffael.util.swing;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -28,6 +29,8 @@ import java.util.concurrent.Callable;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
@@ -227,6 +230,25 @@ public class SwingUtil {
         else {
             return false;
         }
+    }
+
+    public static JComponent wrapBorder(Component content, Border border) {
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.add(content, BorderLayout.CENTER);
+        wrapper.setBorder(border);
+        return wrapper;
+    }
+
+    public static JComponent wrapEmptyBorder(Component content, int top, int left, int bottom, int right) {
+        return wrapBorder(content, BorderFactory.createEmptyBorder(top, left, bottom, right));
+    }
+
+    public static JComponent wrapEmptyBorder(Component content, int thickness) {
+        return wrapEmptyBorder(content, thickness, thickness, thickness, thickness);
+    }
+
+    public static JComponent wrapEmptyBorder(Component content) {
+        return wrapEmptyBorder(content, 5);
     }
 
     public static boolean isJideAvailable() {
