@@ -67,7 +67,7 @@ public class OrValidator<T> extends AbstractCompoundValidator<T> {
         for ( Validator<T> validator : this ) {
             buffer.reset();
             validator.validate(value, result);
-            if ( buffer.didAdd() == null || buffer.didAdd() == Message.Severity.WARNING ) {
+            if ( buffer.getMaxSeverity() == null || buffer.getMaxSeverity() == Message.Severity.WARNING ) {
                 hadValid = true;
                 if ( !keepWarnings ) {
                     return;

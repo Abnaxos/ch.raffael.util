@@ -8,6 +8,7 @@ import ch.raffael.util.binding.Adapter;
 import ch.raffael.util.binding.Binding;
 import ch.raffael.util.binding.Bindings;
 import ch.raffael.util.binding.validate.ValidationListener;
+import ch.raffael.util.binding.validate.ValidationResult;
 
 
 /**
@@ -77,6 +78,11 @@ public class EnabledAdapter implements Adapter<Boolean, Component> {
 
     @Override
     public void validate() {
+    }
+
+    @Override
+    public ValidationResult getValidationStatus() {
+        return ValidationResult.EMPTY;
     }
 
     private void update() {

@@ -16,10 +16,10 @@
 
 package ch.raffael.util.binding.validate;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
+import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -28,7 +28,7 @@ import com.google.common.collect.Sets;
 class ValidationResultBuffer extends AbstractValidationResult {
 
     private Set<Message> messages = null;
-    private Message.Severity didAdd = null;
+    private Message.Severity maxSeverity;
 
     @Override
     public void add(Message message) {
@@ -36,17 +36,21 @@ class ValidationResultBuffer extends AbstractValidationResult {
             messages = Sets.newLinkedHashSet();
         }
         messages.add(message);
-        if ( didAdd == null || didAdd.compareTo(message.getSeverity()) > 1 ) {
-            didAdd = message.getSeverity();
-        }
+        maxSeverity = Validators.max(maxSeverity, message.getSeverity());
     }
 
-    public Message.Severity didAdd() {
-        return didAdd;
+    @Override
+    public Message.Severity getMaxSeverity() {
+        return maxSeverity;
+    }
+
+    @Override
+    public boolean containsSeverity(@NotNull Message.Severity severity) {
+        return maxSeverity != null && maxSeverity.includes(severity);
     }
 
     public void reset() {
-        didAdd = null;
+        maxSeverity = null;
     }
 
     public void flush(ValidationResult to) {

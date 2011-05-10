@@ -16,12 +16,16 @@
 
 package ch.raffael.util.binding.validate;
 
+import org.jetbrains.annotations.NotNull;
+
+
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
 public class ThrowingValidationResult implements ValidationResult {
 
     private boolean throwOnWarning = false;
+    private Message.Severity maxSeverity;
 
     public ThrowingValidationResult() {
     }
@@ -67,5 +71,15 @@ public class ThrowingValidationResult implements ValidationResult {
         if ( throwOnWarning ) {
             throw new ValidationException(message, details);
         }
+    }
+
+    @Override
+    public Message.Severity getMaxSeverity() {
+        return maxSeverity;
+    }
+
+    @Override
+    public boolean containsSeverity(@NotNull Message.Severity severity) {
+        return maxSeverity != null && maxSeverity.includes(severity);
     }
 }

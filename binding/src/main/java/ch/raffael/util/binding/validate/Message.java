@@ -133,6 +133,10 @@ public final class Message {
 
         public abstract Message message(String msg, Object details);
 
+        public boolean includes(@NotNull Severity severity) {
+            return severity.compareTo(this) <= 0;
+        }
+
     }
 
 }

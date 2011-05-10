@@ -36,4 +36,18 @@ public class Validators {
         return new OrValidator<T>(keepWarnings, validators);
     }
 
+    public static Message.Severity max(Message.Severity a, Message.Severity b) {
+        if ( a == null ) {
+            return b;
+        }
+        else if ( b == null ) {
+            return a;
+        }
+        else if ( a.compareTo(b) > 0 ) {
+            return a;
+        }
+        else {
+            return b;
+        }
+    }
 }

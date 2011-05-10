@@ -31,12 +31,10 @@ import org.jetbrains.annotations.NotNull;
 import ch.raffael.util.beans.EventEmitter;
 import ch.raffael.util.binding.Adapter;
 import ch.raffael.util.binding.Binding;
-import ch.raffael.util.binding.PresentationModel;
 import ch.raffael.util.binding.util.BindingTracker;
 import ch.raffael.util.binding.validate.DefaultValidationResult;
-import ch.raffael.util.binding.validate.ValidationEvent;
+import ch.raffael.util.binding.validate.Message;
 import ch.raffael.util.binding.validate.ValidationListener;
-import ch.raffael.util.binding.validate.ValidationResult;
 import ch.raffael.util.binding.validate.Validator;
 
 
@@ -133,6 +131,10 @@ public class TextComponentAdapter implements Adapter<String, JTextComponent> {
         }
     }
 
+    public DefaultValidationResult getValidationStatus() {
+        return validationStatus;
+    }
+
     public Validator<String> getValidator() {
         return validator;
     }
@@ -200,7 +202,9 @@ public class TextComponentAdapter implements Adapter<String, JTextComponent> {
 
         private void documentUpdate() {
             validate();
-            binding.set(component.getText());
+            if ( !validationStatus.containsSeverity(Message.Severity.ERROR) ) {
+                binding.set(component.getText());
+            }
         }
     }
 

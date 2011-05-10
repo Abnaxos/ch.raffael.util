@@ -18,11 +18,44 @@ package ch.raffael.util.binding.validate;
 
 import java.util.Collection;
 
+import org.jetbrains.annotations.NotNull;
+
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
 public interface ValidationResult {
+
+    ValidationResult EMPTY = new ValidationResult() {
+        @Override
+        public void add(Message message) {
+            throw new UnsupportedOperationException();
+        }
+        @Override
+        public void addError(String message) {
+            throw new UnsupportedOperationException();
+        }
+        @Override
+        public void addError(String message, Object details) {
+            throw new UnsupportedOperationException();
+        }
+        @Override
+        public void addWarning(String message) {
+            throw new UnsupportedOperationException();
+        }
+        @Override
+        public void addWarning(String message, Object details) {
+            throw new UnsupportedOperationException();
+        }
+        @Override
+        public Message.Severity getMaxSeverity() {
+            return null;
+        }
+        @Override
+        public boolean containsSeverity(@NotNull Message.Severity severity) {
+            return false;
+        }
+    };
 
     void add(Message message);
 
@@ -33,5 +66,9 @@ public interface ValidationResult {
     void addWarning(String message);
 
     void addWarning(String message, Object details);
+
+    Message.Severity getMaxSeverity();
+
+    boolean containsSeverity(@NotNull Message.Severity severity);
 
 }

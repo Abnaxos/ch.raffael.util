@@ -1,7 +1,6 @@
 package ch.raffael.util.binding.validate;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.base.Objects;
@@ -17,12 +16,15 @@ public class DefaultValidationResult implements ValidationResult {
 
     private Set<Message> messages = null;
 
+    private Message.Severity maxSeverity = null;
+
     @Override
     public void add(Message message) {
         if ( messages == null ) {
             messages = Sets.newLinkedHashSet();
         }
         messages.add(message);
+        maxSeverity = Validators.max(maxSeverity, message.getSeverity());
     }
 
     @Override
@@ -52,6 +54,16 @@ public class DefaultValidationResult implements ValidationResult {
         else {
             return Collections.unmodifiableSet(messages);
         }
+    }
+
+    @Override
+    public Message.Severity getMaxSeverity() {
+        return maxSeverity;
+    }
+
+    @Override
+    public boolean containsSeverity(@NotNull Message.Severity severity) {
+        return maxSeverity != null && maxSeverity.includes(severity);
     }
 
     @Nullable

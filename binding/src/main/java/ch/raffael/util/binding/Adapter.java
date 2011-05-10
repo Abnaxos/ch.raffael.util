@@ -36,4 +36,6 @@ public interface Adapter<B, T> {
 
     void validate();
 
+    ValidationResult getValidationStatus();
+
 }
