@@ -66,6 +66,12 @@ public class FeedbackPanel extends JLayeredPane {
         //setDoubleBuffered(true);
     }
 
+    public FeedbackPanel(Component content) {
+        this();
+        setContent(content);
+    }
+
+
     public Placement getDefaultPlacement() {
         return defaultPlacement;
     }
