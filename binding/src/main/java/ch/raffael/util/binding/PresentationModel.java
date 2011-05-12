@@ -16,10 +16,13 @@
 
 package ch.raffael.util.binding;
 
-import java.util.HashMap;
+import java.awt.Component;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+
+import org.slf4j.Logger;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimaps;
@@ -28,10 +31,10 @@ import org.jetbrains.annotations.NotNull;
 
 import ch.raffael.util.beans.EventEmitter;
 import ch.raffael.util.beans.ObservableSupport;
-import ch.raffael.util.beans.PropertyChangeForwarder;
 import ch.raffael.util.binding.validate.Message;
 import ch.raffael.util.binding.validate.ValidationEvent;
 import ch.raffael.util.binding.validate.ValidationListener;
+import ch.raffael.util.common.logging.LogUtil;
 
 
 /**
@@ -39,16 +42,16 @@ import ch.raffael.util.binding.validate.ValidationListener;
  */
 public class PresentationModel {
 
+    @SuppressWarnings("UnusedDeclaration")
+    private static final Logger log = LogUtil.getLogger();
+
     public static final String PROPERTY_VALID = "valid";
     public static final String PROPERTY_WARNING_COUNT = "warningCount";
     public static final String PROPERTY_ERROR_COUNT = "errorCount";
 
     private final ObservableSupport observableSupport = new ObservableSupport(this);
-    private final Map<Object, Binding> keyedBindings = new HashMap<Object, Binding>();
     private final Set<Adapter<?, ?>> adapters = new HashSet<Adapter<?, ?>>();
     private BufferGroup bufferGroup;
-
-    private PropertyChangeForwarder bufferPropertyForwarder;
 
     private final SetMultimap<Object, Message> validationMessages = LinkedHashMultimap.create();
     private int warningCount = 0;
@@ -95,30 +98,30 @@ public class PresentationModel {
         this.bufferGroup = bufferGroup;
     }
 
-    public void add(@NotNull Binding binding) {
-        if ( binding instanceof Buffer ) {
-            addBuffer((Buffer)binding);
+    @NotNull
+    public <T> T add(@NotNull T member) {
+        boolean added = false;
+        if ( member instanceof Binding ) {
+            added = true;
+            //NOP for now
         }
-        // maybe more at some point
-    }
-
-    public void add(@NotNull Object key, @NotNull Binding<?> binding) {
-        add(binding);
-        keyedBindings.put(key, binding);
-    }
-
-    public void addBuffer(@NotNull Buffer buffer) {
-        bufferGroup.add(buffer);
-    }
-
-    public void addAdapter(@NotNull Adapter<?, ?> adapter) {
-        if ( adapters.add(adapter) ) {
-            adapter.addValidationListener(validationEvents);
+        if ( member instanceof Buffer ) {
+            added = true;
+            bufferGroup.add((Buffer)member);
         }
-    }
-
-    public Binding<?> getBinding(@NotNull Object key) {
-        return keyedBindings.get(key);
+        if ( member instanceof Adapter ) {
+            added = true;
+            if ( adapters.add((Adapter<?, ?>)member) ) {
+                ((Adapter<?, ?>)member).addValidationListener(validationEvents);
+            }
+        }
+        if ( !added ) {
+            log.warn("{} not added to the presentation model: Unknown type", member);
+        }
+        if ( member instanceof PresentationModelMember ) {
+            ((PresentationModelMember)member).presentationModel = this;
+        }
+        return member;
     }
 
     public boolean commitData() {
@@ -139,6 +142,23 @@ public class PresentationModel {
     public void validate() {
         for ( Adapter<?, ?> adapter : adapters ) {
             adapter.validate();
+        }
+    }
+
+    public void scheduleInitialValidation(final Component component) {
+        if ( !component.isShowing() ) {
+            component.addHierarchyListener(new HierarchyListener() {
+                @Override
+                public void hierarchyChanged(HierarchyEvent e) {
+                    if ( component.isShowing() ) {
+                        validate();
+                        component.removeHierarchyListener(this);
+                    }
+                }
+            });
+        }
+        else {
+            validate();
         }
     }
 

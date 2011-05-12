@@ -24,32 +24,22 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
-import javax.swing.text.JTextComponent;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
-import ch.raffael.util.binding.Adapter;
-import ch.raffael.util.binding.BeanPropertyBinding;
-import ch.raffael.util.binding.BufferedBinding;
 import ch.raffael.util.binding.PresentationModel;
 import ch.raffael.util.binding.SimpleBinding;
 import ch.raffael.util.binding.validate.validators.NotEmptyValidator;
-import ch.raffael.util.swing.SwingUtil;
 import ch.raffael.util.swing.binding.EnabledAdapter;
 import ch.raffael.util.swing.binding.TextComponentAdapter;
 import ch.raffael.util.swing.binding.ValidationFeedbackManager;
-import ch.raffael.util.swing.components.feedback.FeedbackPanel;
-import ch.raffael.util.swing.components.feedback.IconTextFeedback;
 
 
 /**
@@ -76,7 +66,7 @@ public class BindingDemoView {
         }
     };
     private final PresentationModel model = new PresentationModel();
-    private final SimpleBinding<Person> person = new SimpleBinding<Person>();
+    private final SimpleBinding<Person> person = model.add(new SimpleBinding<Person>());
 
     public BindingDemoView() {
         person.addPropertyChangeListener(viewUpdater);
@@ -92,35 +82,18 @@ public class BindingDemoView {
                 model.flushData();
             }
         });
-        model.addAdapter(bind("firstName", firstName));
-        TextComponentAdapter lastNameAdapter = bind("lastName", lastName);
-        lastNameAdapter.setValidator(new NotEmptyValidator());
-        model.addAdapter(lastNameAdapter);
-        model.addAdapter(new EnabledAdapter(model.getValidBinding(), applyButton));
-        //root.addAncestorListener(new AncestorListener() {
-        //    @Override
-        //    public void ancestorAdded(AncestorEvent event) {
-        //        FeedbackPanel feedbackPanel = SwingUtil.findComponent(root, FeedbackPanel.class);
-        //        if ( feedbackPanel != null ) {
-        //            System.out.println("Adding feedback");
-        //            root.removeAncestorListener(this);
-        //            feedbackPanel.add(new IconTextFeedback(new ImageIcon(getClass().getResource("/ch/raffael/util/swing/binding/feedback-error.png")), "Test-Feedback", FeedbackPanel.Placement.BOTTOM_RIGHT), firstName);
-        //
-        //            feedbackPanel.revalidate();
-        //        }
-        //    }
-        //
-        //    @Override
-        //    public void ancestorRemoved(AncestorEvent event) {
-        //    }
-        //
-        //    @Override
-        //    public void ancestorMoved(AncestorEvent event) {
-        //    }
-        //});
+        model.add(new EnabledAdapter(model.getValidBinding(), applyButton));
         model.addValidationListener(new ValidationFeedbackManager());
+        model.add(new TextComponentAdapter()).install(
+                firstName,
+                person.<String>property("firstName").buffer()
+        );
+        model.add(new TextComponentAdapter()).install(
+                lastName,
+                person.<String>property("lastName").buffer()
+        ).withValidator(new NotEmptyValidator());
         model.flushData();
-        model.validate();
+        model.scheduleInitialValidation(root);
     }
 
     public Person getPerson() {
@@ -136,14 +109,6 @@ public class BindingDemoView {
             bean.addPropertyChangeListener(viewUpdater);
         }
         model.flushData();
-    }
-
-    private TextComponentAdapter bind(String property, JTextComponent target) {
-        BeanPropertyBinding<String, Person> propBinding = new BeanPropertyBinding<String, Person>(property, person);
-        model.add(propBinding);
-        BufferedBinding<String> buffer = new BufferedBinding<String>(propBinding);
-        model.add(buffer);
-        return new TextComponentAdapter().install(target, buffer);
     }
 
     public JComponent getComponent() {

@@ -24,7 +24,7 @@ import ch.raffael.util.beans.ObservableSupport;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public abstract class AbstractBufferedBinding<T> implements Binding<T>, Buffer {
+public abstract class AbstractBufferedBinding<T> extends AbstractBinding<T> implements Buffer {
 
     protected final ObservableSupport observableSupport = new ObservableSupport(this);
 

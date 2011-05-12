@@ -16,7 +16,6 @@
 
 package ch.raffael.util.binding;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import org.testng.annotations.*;

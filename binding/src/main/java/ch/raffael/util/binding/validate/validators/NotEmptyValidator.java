@@ -16,6 +16,7 @@
 
 package ch.raffael.util.binding.validate.validators;
 
+import ch.raffael.util.binding.PresentationModelMember;
 import ch.raffael.util.binding.validate.ValidationResult;
 import ch.raffael.util.binding.validate.Validator;
 
@@ -23,7 +24,7 @@ import ch.raffael.util.binding.validate.Validator;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class NotEmptyValidator implements Validator<String> {
+public class NotEmptyValidator extends PresentationModelMember implements Validator<String> {
 
     @Override
     public void validate(String value, ValidationResult result) {

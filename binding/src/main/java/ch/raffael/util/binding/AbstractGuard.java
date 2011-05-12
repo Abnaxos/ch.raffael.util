@@ -25,7 +25,7 @@ import ch.raffael.util.beans.ObservableSupport;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class AbstractGuard<T> implements Binding<T> {
+public class AbstractGuard<T> extends AbstractBinding<T> {
 
     private final ObservableSupport observableSupport = new ObservableSupport(this);
     private final PropertyChangeListener guardedListener = new PropertyChangeListener() {

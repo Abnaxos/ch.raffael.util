@@ -28,20 +28,16 @@ import javax.swing.text.JTextComponent;
 
 import org.jetbrains.annotations.NotNull;
 
-import ch.raffael.util.beans.EventEmitter;
-import ch.raffael.util.binding.Adapter;
 import ch.raffael.util.binding.Binding;
 import ch.raffael.util.binding.util.BindingTracker;
-import ch.raffael.util.binding.validate.DefaultValidationResult;
 import ch.raffael.util.binding.validate.Message;
-import ch.raffael.util.binding.validate.ValidationListener;
 import ch.raffael.util.binding.validate.Validator;
 
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class TextComponentAdapter implements Adapter<String, JTextComponent> {
+public class TextComponentAdapter extends ValidatingAdapter<String, JTextComponent> {
 
     private UpdateStrategy updateStrategy = UpdateStrategy.IMMEDIATE;
     private JTextComponent component;
@@ -53,9 +49,6 @@ public class TextComponentAdapter implements Adapter<String, JTextComponent> {
             }
         }
     };
-    private EventEmitter<ValidationListener> validationEvents = EventEmitter.newEmitter(ValidationListener.class);
-    private Validator<String> validator;
-    private DefaultValidationResult validationStatus;
 
     private ImmediateUpdateHandler immediateUpdateHandler = null;
     private FocusUpdateHandler focusUpdateHandler = null;
@@ -66,24 +59,13 @@ public class TextComponentAdapter implements Adapter<String, JTextComponent> {
         return this;
     }
 
-    @Override
-    public void addValidationListener(ValidationListener listener) {
-        validationEvents.addListener(listener);
-    }
-
-    @Override
-    public void removeValidationListener(ValidationListener listener) {
-        validationEvents.removeListener(listener);
-    }
-
     public JTextComponent getComponent() {
         return component;
     }
 
     @Override
     public JTextComponent getTarget() {
-        // FIXME: Not implemented
-        return null;
+        return component;
     }
 
     public void setComponent(JTextComponent component) {
@@ -120,27 +102,20 @@ public class TextComponentAdapter implements Adapter<String, JTextComponent> {
     }
 
     @Override
-    public void validate() {
-        DefaultValidationResult oldStatus = validationStatus;
-        validationStatus = new DefaultValidationResult();
-        if ( validator != null ) {
-            validator.validate(component == null ? null : component.getText(), validationStatus);
-        }
-        if ( !validationEvents.isEmpty() ) {
-            validationStatus.fireEvent(validationEvents.emitter(), oldStatus, this, component);
-        }
+    public TextComponentAdapter withValidator(Validator<String> stringValidator) {
+        super.withValidator(stringValidator);
+        return this;
     }
 
-    public DefaultValidationResult getValidationStatus() {
-        return validationStatus;
+    @Override
+    public TextComponentAdapter withValidators(Validator<String>... validators) {
+        super.withValidators(validators);
+        return this;
     }
 
-    public Validator<String> getValidator() {
-        return validator;
-    }
-
-    public void setValidator(Validator<String> validator) {
-        this.validator = validator;
+    @Override
+    protected String currentValue() {
+        return component == null ? null : component.getText();
     }
 
     private ImmediateUpdateHandler immediateUpdateHandler() {
@@ -156,7 +131,7 @@ public class TextComponentAdapter implements Adapter<String, JTextComponent> {
         }
         return focusUpdateHandler;
     }
-    
+
     private class ImmediateUpdateHandler implements PropertyChangeListener, DocumentListener {
 
         private void install() {

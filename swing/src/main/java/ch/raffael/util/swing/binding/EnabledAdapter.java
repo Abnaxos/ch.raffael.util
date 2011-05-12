@@ -7,6 +7,7 @@ import java.beans.PropertyChangeListener;
 import ch.raffael.util.binding.Adapter;
 import ch.raffael.util.binding.Binding;
 import ch.raffael.util.binding.Bindings;
+import ch.raffael.util.binding.PresentationModelMember;
 import ch.raffael.util.binding.validate.ValidationListener;
 import ch.raffael.util.binding.validate.ValidationResult;
 
@@ -14,7 +15,7 @@ import ch.raffael.util.binding.validate.ValidationResult;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class EnabledAdapter implements Adapter<Boolean, Component> {
+public class EnabledAdapter extends PresentationModelMember implements Adapter<Boolean, Component> {
 
     private Binding<Boolean> binding;
     private Component target;

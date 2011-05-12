@@ -27,7 +27,7 @@ import ch.raffael.util.beans.ObservableSupport;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public abstract class AbstractChainedBinding<T, S> implements ChainedBinding<T,S> {
+public abstract class AbstractChainedBinding<T, S> extends AbstractBinding<T> implements ChainedBinding<T,S> {
 
     protected final ObservableSupport observableSupport = new ObservableSupport(this);
     private final PropertyChangeListener sourceObserver = new PropertyChangeListener() {

@@ -24,7 +24,7 @@ import ch.raffael.util.beans.ObservableSupport;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class SimpleBinding<T> implements Binding<T> {
+public class SimpleBinding<T> extends AbstractBinding<T> {
 
     protected final ObservableSupport observableSupport = new ObservableSupport(this);
     private T value;
@@ -63,5 +63,9 @@ public class SimpleBinding<T> implements Binding<T> {
 
     protected void valueChanged(T oldValue, T newValue) {
     }
-    
+
+    public <P> BeanPropertyBinding<P, T> property(String name) {
+        return add(new BeanPropertyBinding<P, T>(name, this));
+    }
+
 }

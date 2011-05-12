@@ -46,6 +46,10 @@ public class BeanPropertyBinding<T, B> extends AbstractChainedBinding<T, B> {
         setSource(source);
     }
 
+    public static <T, B> BeanPropertyBinding<T, B> on(String propertyName, Binding<B> source) {
+        return new BeanPropertyBinding<T, B>(propertyName, source);
+    }
+
     public String getPropertyName() {
         return propertyName;
     }

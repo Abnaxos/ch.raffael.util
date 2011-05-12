@@ -16,13 +16,13 @@
 
 package ch.raffael.util.binding;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-import static org.testng.Assert.*;
 import org.testng.annotations.*;
 import org.easymock.EasyMock;
+
+import static org.testng.Assert.*;
 
 
 /**

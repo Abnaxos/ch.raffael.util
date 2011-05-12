@@ -5,6 +5,7 @@ import java.net.URL;
 
 import org.slf4j.Logger;
 
+import ch.raffael.util.binding.PresentationModelMember;
 import ch.raffael.util.binding.validate.ValidationResult;
 import ch.raffael.util.binding.validate.Validator;
 import ch.raffael.util.common.logging.LogUtil;
@@ -13,7 +14,7 @@ import ch.raffael.util.common.logging.LogUtil;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class UrlValidator implements Validator<String> {
+public class UrlValidator extends PresentationModelMember implements Validator<String> {
 
     @SuppressWarnings("UnusedDeclaration")
     private static final Logger log = LogUtil.getLogger();

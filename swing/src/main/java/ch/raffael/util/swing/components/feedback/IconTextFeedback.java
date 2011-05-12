@@ -200,14 +200,14 @@ public class IconTextFeedback extends JPanel implements Feedback {
         public Dimension preferredLayoutSize(Container parent) {
             Insets insets = parent.getInsets();
             Dimension pref = icon.getPreferredSize();
-            if ( text.isVisible() ) {
+            //if ( text.isVisible() ) {
                 Dimension textPref = text.getPreferredSize();
                 pref.height += textPref.height;
                 textPref.width += pref.width / 2;
                 if ( textPref.width > pref.width ) {
                     pref.width = textPref.width;
                 }
-            }
+            //}
             pref.width += insets.left + insets.right;
             pref.height += insets.top + insets.bottom;
             return pref;

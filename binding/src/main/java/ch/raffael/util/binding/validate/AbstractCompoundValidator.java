@@ -24,11 +24,13 @@ import java.util.Set;
 
 import com.sun.xml.internal.stream.util.ReadOnlyIterator;
 
+import ch.raffael.util.binding.PresentationModelMember;
+
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public abstract class AbstractCompoundValidator<T> implements Validator<T>, Iterable<Validator<T>> {
+public abstract class AbstractCompoundValidator<T> extends PresentationModelMember implements Validator<T>, Iterable<Validator<T>> {
 
     private final Set<Validator<T>> validators = new LinkedHashSet<Validator<T>>();
 

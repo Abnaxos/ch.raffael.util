@@ -12,7 +12,7 @@ import ch.raffael.util.binding.convert.Converter;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class ConverterBinding<T, S> implements ChainedBinding<T, S> {
+public class ConverterBinding<T, S> extends AbstractBinding<T> implements ChainedBinding<T, S> {
 
     private final ObservableSupport observableSupport = new ObservableSupport(this);
     private final PropertyChangeListener propertyChangeForwarder = new PropertyChangeListener() {
