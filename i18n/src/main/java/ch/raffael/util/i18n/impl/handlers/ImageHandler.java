@@ -48,7 +48,7 @@ public class ImageHandler extends NoParametersHandler {
     @Override
     public Object resolve(Class<? extends ResourceBundle> bundleClass, ResourcePointer ptr, URL baseUrl, String value) throws Exception {
         URL url = new URL(baseUrl, value);
-        log.debug("Loading image from {}");
+        log.debug("Loading image from {}", url);
         InputStream input = null;
         try {
             input = new BufferedInputStream(url.openStream());
