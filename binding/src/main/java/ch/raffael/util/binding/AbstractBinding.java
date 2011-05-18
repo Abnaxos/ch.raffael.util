@@ -21,4 +21,5 @@ public abstract class AbstractBinding<T> extends PresentationModelMember impleme
         return append(new ConverterBinding<NEXT, T>(converter));
     }
 
+
 }

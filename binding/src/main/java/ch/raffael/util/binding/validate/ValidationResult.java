@@ -16,9 +16,11 @@
 
 package ch.raffael.util.binding.validate;
 
-import java.util.Collection;
-
 import org.jetbrains.annotations.NotNull;
+
+import ch.raffael.util.binding.InvalidValueException;
+
+import static ch.raffael.util.binding.validate.Message.Severity.*;
 
 
 /**
@@ -46,6 +48,37 @@ public interface ValidationResult {
         @Override
         public void addWarning(String message, Object details) {
             throw new UnsupportedOperationException();
+        }
+        @Override
+        public Message.Severity getMaxSeverity() {
+            return null;
+        }
+        @Override
+        public boolean containsSeverity(@NotNull Message.Severity severity) {
+            return false;
+        }
+    };
+
+    ValidationResult THROW = new ValidationResult() {
+        @Override
+        public void add(Message message) {
+            if ( message.getSeverity() == ERROR ) {
+                throw new InvalidValueException(message.getMessage(), message.getDetails());
+            }
+        }
+        @Override
+        public void addError(String message) {
+            throw new InvalidValueException(message);
+        }
+        @Override
+        public void addError(String message, Object details) {
+            throw new InvalidValueException(message, details);
+        }
+        @Override
+        public void addWarning(String message) {
+        }
+        @Override
+        public void addWarning(String message, Object details) {
         }
         @Override
         public Message.Severity getMaxSeverity() {

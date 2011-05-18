@@ -1,7 +1,9 @@
 package ch.raffael.util.binding.convert;
 
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
+
+import ch.raffael.util.binding.InvalidValueException;
 
 
 /**
@@ -24,19 +26,18 @@ public class LongToStringConverter implements Converter<Long, String> {
         if ( value == null ) {
             return null;
         }
-        long result = 0;
-        for ( int i = 0; i < value.length(); i++ ) {
-            char c = value.charAt(i);
-            if ( Character.isWhitespace(c) || c == DecimalFormatSymbols.getInstance().getGroupingSeparator() ) {
-                // ignore
+        try {
+            Number result;
+            result = format.parse(value);
+            // see javadoc: Most values will be returned as Long; Double will be used,
+            // if the number doesn't fit into Long => throw number too big
+            if ( result instanceof Double ) {
+                throw new InvalidValueException("Number '" + value + "' too big");
             }
-            else if ( c >= '0' && c <= '9' ) {
-                result = result * 10 + (c - '0');
-            }
-            else {
-                return result;
-            }
+            return (Long)result; // see above, we can cast safely
         }
-        return result;
+        catch ( ParseException e ) {
+            throw new InvalidValueException("Invalid number '" + value + "': " + e.getLocalizedMessage(), e);
+        }
     }
 }

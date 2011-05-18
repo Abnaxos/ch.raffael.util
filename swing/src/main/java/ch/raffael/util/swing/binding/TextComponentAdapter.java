@@ -102,14 +102,8 @@ public class TextComponentAdapter extends ValidatingAdapter<String, JTextCompone
     }
 
     @Override
-    public TextComponentAdapter withValidator(Validator<String> stringValidator) {
-        super.withValidator(stringValidator);
-        return this;
-    }
-
-    @Override
-    public TextComponentAdapter withValidators(Validator<String>... validators) {
-        super.withValidators(validators);
+    public TextComponentAdapter validator(Validator<String> stringValidator) {
+        super.validator(stringValidator);
         return this;
     }
 

@@ -91,7 +91,7 @@ public class BindingDemoView {
         model.add(new TextComponentAdapter()).install(
                 lastName,
                 person.<String>property("lastName").buffer()
-        ).withValidator(new NotEmptyValidator());
+        ).validator(new NotEmptyValidator());
         model.flushData();
         model.scheduleInitialValidation(root);
     }

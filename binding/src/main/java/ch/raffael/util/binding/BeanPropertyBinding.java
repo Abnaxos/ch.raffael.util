@@ -20,15 +20,21 @@ import org.jetbrains.annotations.NotNull;
 
 import ch.raffael.util.beans.BeanUtils;
 import ch.raffael.util.beans.PropertyChangeForwarder;
+import ch.raffael.util.binding.util.ValidatorHolder;
+import ch.raffael.util.binding.validate.ValidationResult;
+import ch.raffael.util.binding.validate.Validator;
 
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class BeanPropertyBinding<T, B> extends AbstractChainedBinding<T, B> {
+public class BeanPropertyBinding<T, B> extends AbstractChainedBinding<T, B> implements ValidatingBinding<T> {
 
     private String propertyName;
     private PropertyChangeForwarder forwarder = new PropertyChangeForwarder(this, observableSupport);
+
+    private final ValidatorHolder<T> validatorHolder = new ValidatorHolder<T>();
+
 
     public BeanPropertyBinding() {
     }
@@ -67,7 +73,7 @@ public class BeanPropertyBinding<T, B> extends AbstractChainedBinding<T, B> {
     @Override
     protected void detachSource(@NotNull B source) {
         super.detachSource(source);
-        if ( BeanUtils.getEventSetDescriptor(source, "propertyChange") != null) {
+        if ( BeanUtils.getEventSetDescriptor(source, "propertyChange") != null ) {
             BeanUtils.removePropertyChangeListener(source, forwarder);
         }
     }
@@ -75,7 +81,7 @@ public class BeanPropertyBinding<T, B> extends AbstractChainedBinding<T, B> {
     @Override
     protected void attachSource(@NotNull B source) {
         super.attachSource(source);
-        if ( BeanUtils.getEventSetDescriptor(source, "propertyChange") != null) {
+        if ( BeanUtils.getEventSetDescriptor(source, "propertyChange") != null ) {
             BeanUtils.addPropertyChangeListener(source, forwarder);
         }
     }
@@ -94,6 +100,25 @@ public class BeanPropertyBinding<T, B> extends AbstractChainedBinding<T, B> {
         if ( propertyName == null ) {
             return;
         }
+        validatorHolder.checkValue(value);
         BeanUtils.setProperty(src, propertyName, value);
+    }
+
+    @Override
+    public void validate(T value, ValidationResult result) {
+        validatorHolder.validate(value, result);
+    }
+
+    public Validator<T> getValidator() {
+        return validatorHolder.getValidator();
+    }
+
+    public void setValidator(Validator<T> validator) {
+        validatorHolder.setValidator(validator);
+    }
+
+    public BeanPropertyBinding<T, B> validator(Validator<T> validator) {
+        this.validatorHolder.append(validator);
+        return this;
     }
 }

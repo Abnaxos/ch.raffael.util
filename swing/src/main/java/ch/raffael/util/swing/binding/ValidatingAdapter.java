@@ -3,10 +3,11 @@ package ch.raffael.util.swing.binding;
 import ch.raffael.util.beans.EventEmitter;
 import ch.raffael.util.binding.Adapter;
 import ch.raffael.util.binding.PresentationModelMember;
+import ch.raffael.util.binding.ValidatingBinding;
+import ch.raffael.util.binding.util.ValidatorHolder;
 import ch.raffael.util.binding.validate.DefaultValidationResult;
 import ch.raffael.util.binding.validate.ValidationListener;
 import ch.raffael.util.binding.validate.Validator;
-import ch.raffael.util.binding.validate.Validators;
 
 
 /**
@@ -16,7 +17,7 @@ public abstract class ValidatingAdapter<B, T> extends PresentationModelMember im
 
 
     private EventEmitter<ValidationListener> validationEvents = EventEmitter.newEmitter(ValidationListener.class);
-    private Validator<B> validator;
+    private final ValidatorHolder<B> validator = new ValidatorHolder<B>();
     protected DefaultValidationResult validationStatus;
 
     @Override
@@ -33,8 +34,12 @@ public abstract class ValidatingAdapter<B, T> extends PresentationModelMember im
     public void validate() {
         DefaultValidationResult oldStatus = validationStatus;
         validationStatus = new DefaultValidationResult();
+        B value = currentValue();
         if ( validator != null ) {
-            validator.validate(currentValue(), validationStatus);
+            validator.validate(value, validationStatus);
+        }
+        if ( getBinding() instanceof ValidatingBinding ) {
+            ((ValidatingBinding<B>)getBinding()).validate(value, validationStatus);
         }
         if ( !validationEvents.isEmpty() ) {
             validationStatus.fireEvent(validationEvents.emitter(), oldStatus, this, getTarget());
@@ -46,20 +51,15 @@ public abstract class ValidatingAdapter<B, T> extends PresentationModelMember im
     }
 
     public Validator<B> getValidator() {
-        return validator;
+        return validator.getValidator();
     }
 
     public void setValidator(Validator<B> validator) {
-        this.validator = validator;
+        this.validator.setValidator(validator);
     }
 
-    public ValidatingAdapter withValidator(Validator<B> validator) {
-        setValidator(validator);
-        return this;
-    }
-
-    public ValidatingAdapter withValidators(Validator<B>... validators) {
-        setValidator(Validators.and(validators));
+    public ValidatingAdapter validator(Validator<B> validator) {
+        this.validator.append(validator);
         return this;
     }
 

@@ -18,15 +18,21 @@ package ch.raffael.util.binding;
 
 import java.beans.PropertyChangeListener;
 
+import org.jetbrains.annotations.NotNull;
+
 import ch.raffael.util.beans.ObservableSupport;
+import ch.raffael.util.binding.util.ValidatorHolder;
+import ch.raffael.util.binding.validate.ValidationResult;
+import ch.raffael.util.binding.validate.Validator;
 
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public abstract class AbstractBufferedBinding<T> extends AbstractBinding<T> implements Buffer {
+public abstract class AbstractBufferedBinding<T> extends AbstractBinding<T> implements Buffer, ValidatingBinding<T> {
 
     protected final ObservableSupport observableSupport = new ObservableSupport(this);
+    private final ValidatorHolder<T> validatorHolder = new ValidatorHolder<T>();
 
     private T value = null;
     private T original = null;
@@ -48,6 +54,7 @@ public abstract class AbstractBufferedBinding<T> extends AbstractBinding<T> impl
     @Override
     public void setValue(T value) {
         if ( !Bindings.equal(this.value, value, true) ) {
+            validatorHolder.checkValue(value);
             Object oldValue = this.value;
             this.value = value;
             observableSupport.firePropertyChange(PROPERTY_VALUE, oldValue, value);
@@ -89,6 +96,25 @@ public abstract class AbstractBufferedBinding<T> extends AbstractBinding<T> impl
         //    buffering = false;
         //    observableSupport.firePropertyChange(PROPERTY_BUFFERING, true, false);
         //}
+    }
+
+    @Override
+    public void validate(T value, ValidationResult result) {
+        validatorHolder.validate(value, result);
+    }
+
+    public Validator<T> getValidator() {
+        return validatorHolder.getValidator();
+    }
+
+    public void setValidator(Validator<T> validator) {
+        validatorHolder.setValidator(validator);
+    }
+
+    @NotNull
+    public AbstractBufferedBinding<T> validator(@NotNull Validator<T> validator) {
+        validatorHolder.append(validator);
+        return this;
     }
 
 }

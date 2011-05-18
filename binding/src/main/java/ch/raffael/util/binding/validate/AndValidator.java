@@ -27,11 +27,7 @@ public class AndValidator<T> extends AbstractCompoundValidator<T> {
     public AndValidator() {
     }
 
-    public AndValidator(Validator<T> tValidator) {
-        super(tValidator);
-    }
-
-    public AndValidator(Validator<T>... validator) {
+    public AndValidator(Validator<T> validator) {
         super(validator);
     }
 
@@ -44,5 +40,17 @@ public class AndValidator<T> extends AbstractCompoundValidator<T> {
         for ( Validator<T> v : this ) {
             v.validate(value, result);
         }
+    }
+
+    @Override
+    public AbstractCompoundValidator<T> add(Validator<T> validator) {
+        super.add(validator);
+        return this;
+    }
+
+    @Override
+    public AbstractCompoundValidator<T> add(Collection<Validator<T>> validators) {
+        super.add(validators);
+        return this;
     }
 }

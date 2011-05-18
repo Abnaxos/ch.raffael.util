@@ -18,6 +18,10 @@ package ch.raffael.util.binding.validate;
 
 import org.jetbrains.annotations.NotNull;
 
+import ch.raffael.util.binding.InvalidValueException;
+
+import static ch.raffael.util.binding.validate.Message.Severity.*;
+
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
@@ -44,32 +48,37 @@ public class ThrowingValidationResult implements ValidationResult {
 
     @Override
     public void add(Message message) {
-        if ( throwOnWarning || message.getSeverity() == Message.Severity.ERROR ) {
-            throw new ValidationException(message.getMessage(), message.getDetails());
+        maxSeverity = Validators.max(message.getSeverity(), maxSeverity);
+        if ( throwOnWarning || message.getSeverity() == ERROR ) {
+            throw new InvalidValueException(message.getMessage(), message.getDetails());
         }
     }
 
     @Override
     public void addError(String message) {
-        throw new ValidationException(message);
+        maxSeverity = Validators.max(ERROR, maxSeverity);
+        throw new InvalidValueException(message);
     }
 
     @Override
     public void addError(String message, Object details) {
-        throw new ValidationException(message, details);
+        maxSeverity = Validators.max(ERROR, maxSeverity);
+        throw new InvalidValueException(message, details);
     }
 
     @Override
     public void addWarning(String message) {
+        maxSeverity = Validators.max(WARNING, maxSeverity);
         if ( throwOnWarning ) {
-            throw new ValidationException(message);
+            throw new InvalidValueException(message);
         }
     }
 
     @Override
     public void addWarning(String message, Object details) {
+        maxSeverity = Validators.max(WARNING, maxSeverity);
         if ( throwOnWarning ) {
-            throw new ValidationException(message, details);
+            throw new InvalidValueException(message, details);
         }
     }
 

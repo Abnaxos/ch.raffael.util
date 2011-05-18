@@ -19,6 +19,11 @@ package ch.raffael.util.binding;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import org.jetbrains.annotations.NotNull;
+
+import ch.raffael.util.binding.validate.ValidationResult;
+import ch.raffael.util.binding.validate.Validator;
+
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
@@ -64,6 +69,14 @@ public class BufferedBinding<T> extends AbstractBufferedBinding<T> implements Ch
     }
 
     @Override
+    public void validate(T value, ValidationResult result) {
+        super.validate(value, result);
+        if ( getSource() instanceof ValidatingBinding ) {
+            ((ValidatingBinding<T>)getSource()).validate(value, result);
+        }
+    }
+
+    @Override
     public void flush() {
         reset(Bindings.getValue(source));
     }
@@ -77,5 +90,12 @@ public class BufferedBinding<T> extends AbstractBufferedBinding<T> implements Ch
             source.setValue(getValue());
             reset(source.getValue());
         }
+    }
+
+    @NotNull
+    @Override
+    public BufferedBinding<T> validator(@NotNull Validator<T> tValidator) {
+        super.validator(tValidator);
+        return this;
     }
 }

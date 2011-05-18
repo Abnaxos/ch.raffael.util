@@ -16,7 +16,6 @@
 
 package ch.raffael.util.binding.validate;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -41,24 +40,18 @@ public abstract class AbstractCompoundValidator<T> extends PresentationModelMemb
         add(validator);
     }
 
-    protected AbstractCompoundValidator(Validator<T>... validator) {
-        add(validators);
-    }
-
     protected AbstractCompoundValidator(Collection<Validator<T>> validator) {
         add(validators);
     }
 
-    public void add(Validator<T> validator) {
+    public AbstractCompoundValidator<T> add(Validator<T> validator) {
         validators.add(validator);
+        return this;
     }
 
-    public void add(Validator<T>... validators) {
-        this.validators.addAll(Arrays.asList(validators));
-    }
-
-    public void add(Collection<Validator<T>> validators) {
+    public AbstractCompoundValidator<T> add(Collection<Validator<T>> validators) {
         this.validators.addAll(validators);
+        return this;
     }
 
     @Override

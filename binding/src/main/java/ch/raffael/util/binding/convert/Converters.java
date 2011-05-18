@@ -40,6 +40,42 @@ public class Converters {
         return new ChainLink<S, S, T>(Converters.<S>doNothing(), converter);
     }
 
+    public static <T> Converter<String, T> trimSource(final Converter<String, T> converter) {
+        return new Converter<String, T>() {
+            @Override
+            public T sourceToTarget(String value) {
+                if ( value != null ) {
+                    return converter.sourceToTarget(value.trim());
+                }
+                else {
+                    return converter.sourceToTarget(null);
+                }
+            }
+            @Override
+            public String targetToSource(T value) {
+                return converter.targetToSource(value);
+            }
+        };
+    }
+
+    public static <S> Converter<S, String> trimTarget(final Converter<S, String> converter) {
+        return new Converter<S, String>() {
+            @Override
+            public String sourceToTarget(S value) {
+                return converter.sourceToTarget(value);
+            }
+            @Override
+            public S targetToSource(String value) {
+                if ( value != null ) {
+                    return converter.targetToSource(value.trim());
+                }
+                else {
+                    return converter.targetToSource(null);
+                }
+            }
+        };
+    }
+
     public static class ChainLink<S, M, T> implements Converter<S, T> {
 
         private final Converter<S, M> c1;

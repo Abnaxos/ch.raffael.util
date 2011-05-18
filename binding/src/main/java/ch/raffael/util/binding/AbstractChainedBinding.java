@@ -147,4 +147,5 @@ public abstract class AbstractChainedBinding<T, S> extends AbstractBinding<T> im
     }
 
     protected abstract void setValue(@NotNull S src, T value);
+
 }

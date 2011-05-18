@@ -1,5 +1,9 @@
 package ch.raffael.util.binding.convert;
 
+
+import ch.raffael.util.binding.InvalidValueException;
+
+
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
@@ -20,6 +24,10 @@ public class IntToStringConverter implements Converter<Integer, String> {
         if ( value == null ) {
             return null;
         }
-        return longToString.targetToSource(value).intValue();
+        long result = longToString.targetToSource(value);
+        if ( result > Integer.MAX_VALUE || result < Integer.MIN_VALUE ) {
+            throw new InvalidValueException("Number '" + value + "' too big");
+        }
+        return (int)result;
     }
 }

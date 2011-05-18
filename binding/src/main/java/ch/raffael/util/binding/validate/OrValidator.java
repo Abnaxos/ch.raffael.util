@@ -33,10 +33,6 @@ public class OrValidator<T> extends AbstractCompoundValidator<T> {
         super(tValidator);
     }
 
-    public OrValidator(Validator<T>... validator) {
-        super(validator);
-    }
-
     public OrValidator(Collection<Validator<T>> validator) {
         super(validator);
     }
@@ -46,11 +42,6 @@ public class OrValidator<T> extends AbstractCompoundValidator<T> {
     }
 
     public OrValidator(Validator<T> validator, boolean keepWarnings) {
-        super(validator);
-        this.keepWarnings = keepWarnings;
-    }
-
-    public OrValidator(boolean keepWarnings, Validator<T>... validator) {
         super(validator);
         this.keepWarnings = keepWarnings;
     }

@@ -7,12 +7,14 @@ import org.jetbrains.annotations.NotNull;
 
 import ch.raffael.util.beans.ObservableSupport;
 import ch.raffael.util.binding.convert.Converter;
+import ch.raffael.util.binding.validate.ValidationResult;
+import ch.raffael.util.binding.validate.Validator;
 
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class ConverterBinding<T, S> extends AbstractBinding<T> implements ChainedBinding<T, S> {
+public class ConverterBinding<T, S> extends AbstractBinding<T> implements ChainedBinding<T, S>, ValidatingBinding<T> {
 
     private final ObservableSupport observableSupport = new ObservableSupport(this);
     private final PropertyChangeListener propertyChangeForwarder = new PropertyChangeListener() {
@@ -27,6 +29,7 @@ public class ConverterBinding<T, S> extends AbstractBinding<T> implements Chaine
         }
     };
     private final Converter<S, T> converter;
+    private Validator<T> validator;
 
     private Binding<S> source;
 
@@ -83,5 +86,33 @@ public class ConverterBinding<T, S> extends AbstractBinding<T> implements Chaine
     @Override
     public void setValue(T value) {
         Bindings.setValue(source, converter.targetToSource(value));
+    }
+
+    @Override
+    public void validate(T value, ValidationResult result) {
+        S convertedValue;
+        try {
+            convertedValue = converter.targetToSource(value);
+        }
+        catch ( InvalidValueException e ) {
+            result.addError(e.getLocalizedMessage(), e);
+            return;
+        }
+        if ( source instanceof ValidatingBinding ) {
+            ((ValidatingBinding<S>)source).validate(convertedValue, result);
+        }
+    }
+
+    public Validator<T> getValidator() {
+        return validator;
+    }
+
+    public void setValidator(Validator<T> validator) {
+        this.validator = validator;
+    }
+
+    public ConverterBinding validate(Validator<T> validator) {
+        setValidator(validator);
+        return this;
     }
 }

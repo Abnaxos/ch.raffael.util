@@ -24,18 +24,6 @@ public class Validators {
     private Validators() {
     }
 
-    public static <T> Validator<T> and(Validator<T>... validators) {
-        return new AndValidator<T>(validators);
-    }
-
-    public static <T> Validator<T> or(Validator<T>... validators) {
-        return new OrValidator<T>(validators);
-    }
-
-    public static <T> Validator<T> or(boolean keepWarnings, Validator<T>... validators) {
-        return new OrValidator<T>(keepWarnings, validators);
-    }
-
     public static Message.Severity max(Message.Severity a, Message.Severity b) {
         if ( a == null ) {
             return b;

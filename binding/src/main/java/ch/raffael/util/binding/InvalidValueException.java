@@ -14,53 +14,56 @@
  * limitations under the License.
  */
 
-package ch.raffael.util.binding.validate;
+package ch.raffael.util.binding;
+
+import ch.raffael.util.binding.validate.Message;
+
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class ValidationException extends RuntimeException {
+public class InvalidValueException extends RuntimeException {
     private static final long serialVersionUID = 2011030401L;
 
     @SuppressWarnings( { "NonSerializableFieldInSerializableClass" })
     private final Object details;
 
-    public ValidationException() {
+    public InvalidValueException() {
         super(Message.ensureMessage(null));
         this.details = null;
     }
 
-    public ValidationException(String message) {
+    public InvalidValueException(String message) {
         super(Message.ensureMessage(message));
         this.details = null;
     }
 
-    public ValidationException(String message, Throwable cause) {
+    public InvalidValueException(String message, Throwable cause) {
         super(Message.ensureMessage(message), cause);
         this.details = null;
     }
 
-    public ValidationException(Throwable cause) {
+    public InvalidValueException(Throwable cause) {
         super(Message.ensureMessage(null), cause);
         this.details = null;
     }
 
-    public ValidationException(Object details) {
+    public InvalidValueException(Object details) {
         super(Message.ensureMessage(null));
         this.details = details;
     }
 
-    public ValidationException(String message, Object details) {
+    public InvalidValueException(String message, Object details) {
         super(Message.ensureMessage(message));
         this.details = details;
     }
 
-    public ValidationException(String message, Throwable cause, Object details) {
+    public InvalidValueException(String message, Throwable cause, Object details) {
         super(Message.ensureMessage(message), cause);
         this.details = details;
     }
 
-    public ValidationException(Throwable cause, Object details) {
+    public InvalidValueException(Throwable cause, Object details) {
         super(Message.ensureMessage(null), cause);
         this.details = details;
     }
