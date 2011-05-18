@@ -189,11 +189,11 @@ public class FeedbackPanel extends JLayeredPane {
         @Override
         public void layoutContainer(Container parent) {
             Insets insets = parent.getInsets();
-            Rectangle bounds = parent.getBounds();
-            bounds.x += insets.left;
-            bounds.y += insets.top;
-            bounds.width -= insets.left + insets.right;
-            bounds.height -= insets.top + insets.bottom;
+            Rectangle bounds = new Rectangle();
+            bounds.x = insets.left;
+            bounds.y = insets.top;
+            bounds.width = parent.getWidth() - insets.left + insets.right;
+            bounds.height = parent.getHeight() - insets.top + insets.bottom;
             content.setBounds(bounds);
         }
 
