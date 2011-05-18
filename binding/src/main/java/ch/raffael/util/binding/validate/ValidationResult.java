@@ -16,6 +16,9 @@
 
 package ch.raffael.util.binding.validate;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.jetbrains.annotations.NotNull;
 
 import ch.raffael.util.binding.InvalidValueException;
@@ -26,7 +29,7 @@ import static ch.raffael.util.binding.validate.Message.Severity.*;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public interface ValidationResult {
+public interface ValidationResult extends ValidationStatus {
 
     ValidationResult EMPTY = new ValidationResult() {
         @Override
@@ -48,6 +51,10 @@ public interface ValidationResult {
         @Override
         public void addWarning(String message, Object details) {
             throw new UnsupportedOperationException();
+        }
+        @Override
+        public Set<Message> getMessages() {
+            return Collections.emptySet();
         }
         @Override
         public Message.Severity getMaxSeverity() {
@@ -79,6 +86,10 @@ public interface ValidationResult {
         }
         @Override
         public void addWarning(String message, Object details) {
+        }
+        @Override
+        public Set<Message> getMessages() {
+            return Collections.emptySet();
         }
         @Override
         public Message.Severity getMaxSeverity() {

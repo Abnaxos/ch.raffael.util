@@ -16,6 +16,7 @@
 
 package ch.raffael.util.binding.validate;
 
+import java.util.Collections;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
@@ -37,6 +38,11 @@ class ValidationResultBuffer extends AbstractValidationResult {
         }
         messages.add(message);
         maxSeverity = Validators.max(maxSeverity, message.getSeverity());
+    }
+
+    @Override
+    public Set<Message> getMessages() {
+        return Collections.unmodifiableSet(messages);
     }
 
     @Override
