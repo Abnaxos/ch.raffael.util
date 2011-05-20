@@ -44,7 +44,7 @@ public class BufferGroup implements Buffer, Iterable<Buffer> {
             }
         }
     };
-    private boolean skipNonBuffering = true;
+    private boolean skipNonBuffering = false;
 
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {

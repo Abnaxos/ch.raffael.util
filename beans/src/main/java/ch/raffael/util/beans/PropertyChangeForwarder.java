@@ -26,17 +26,14 @@ import java.util.HashMap;
  */
 public class PropertyChangeForwarder implements PropertyChangeListener {
 
-    private final Object source;
     private final ObservableSupport emitter;
     private final HashMap<String, String> propertyMappings = new HashMap<String, String>();
 
-    public PropertyChangeForwarder(Object source, ObservableSupport emitter) {
-        this.source = source;
+    public PropertyChangeForwarder(ObservableSupport emitter) {
         this.emitter = emitter;
     }
 
-    public PropertyChangeForwarder(Object source, ObservableSupport emitter, String... propertyNames) {
-        this.source = source;
+    public PropertyChangeForwarder(ObservableSupport emitter, String... propertyNames) {
         this.emitter = emitter;
         if ( propertyNames != null && propertyNames.length > 0 ) {
             for ( String p : propertyNames ) {

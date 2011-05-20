@@ -86,7 +86,7 @@ public class Injector<T> {
         });
         List<MemberInfo<Constructor<?>>> result = new ArrayList<MemberInfo<Constructor<?>>>(ctors.length);
         for ( Constructor<?> ctor : ctors ) {
-            if ( ctor.getAnnotation(NoInject.class) != null ) {
+            if ( ctor.getAnnotation(NoInject.class) == null ) {
                 result.add(this.<Constructor<?>>readMemberInfo(ctor, true, ctor.getParameterTypes(), ctor.getParameterAnnotations()));
             }
         }

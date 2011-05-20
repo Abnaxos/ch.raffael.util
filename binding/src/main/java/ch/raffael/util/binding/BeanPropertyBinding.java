@@ -31,7 +31,7 @@ import ch.raffael.util.binding.validate.Validator;
 public class BeanPropertyBinding<T, B> extends AbstractChainedBinding<T, B> implements ValidatingBinding<T> {
 
     private String propertyName;
-    private PropertyChangeForwarder forwarder = new PropertyChangeForwarder(this, observableSupport);
+    private PropertyChangeForwarder forwarder = new PropertyChangeForwarder(observableSupport);
 
     private final ValidatorHolder<T> validatorHolder = new ValidatorHolder<T>();
 

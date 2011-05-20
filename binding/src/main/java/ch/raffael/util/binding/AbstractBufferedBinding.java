@@ -90,6 +90,12 @@ public abstract class AbstractBufferedBinding<T> extends AbstractBinding<T> impl
 
     protected void reset(T value) {
         this.original = value;
+        if ( this.value != null && this.value.equals(value) ) {
+            // force a property change event by first setting the value to null
+            // see PropertyChangeSupport: an event will ALWAYS be fired if the old value
+            // is null
+            this.value = null;
+        }
         setValue(value);
         // propertyChange for buffering has been checked in setValue()
         //if ( buffering ) {
