@@ -110,6 +110,7 @@ public abstract class CommonAction extends AbstractAction {
         if ( keySig != null && KeyStroke.class.isAssignableFrom(keySig.getReturnType()) ) {
             putValue(ACCELERATOR_KEY, resources.meta().resource(baseName + "Key").get());
         }
+        setEnabled(enabled);
     }
 
     private static MethodSignature find(Set<MethodSignature> sigs, String name) {
