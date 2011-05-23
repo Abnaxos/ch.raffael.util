@@ -107,11 +107,11 @@ public class Property<T> implements Serializable {
     public T get() {
         if ( synchronize != null ) {
             synchronized ( synchronize ) {
-                return doGet();
+                return processOutgoing(doGet());
             }
         }
         else {
-            return doGet();
+            return processOutgoing(doGet());
         }
     }
     
@@ -122,11 +122,11 @@ public class Property<T> implements Serializable {
     public void set(T value) {
         if ( synchronize != null ) {
             synchronized ( synchronize ) {
-                doSet(value);
+                doSet(processIncoming(value));
             }
         }
         else {
-            doSet(value);
+            doSet(processIncoming(value));
         }
     }
 
@@ -147,7 +147,7 @@ public class Property<T> implements Serializable {
             this.value = value;
             didChange(oldValue, value);
             if ( changeSupport != null ) {
-                changeSupport.firePropertyChange(name, oldValue, value);
+                changeSupport.firePropertyChange(name, processOutgoing(oldValue), processOutgoing(value));
             }
         }
     }
@@ -162,13 +162,21 @@ public class Property<T> implements Serializable {
             this.value = value;
             didChange(oldValue, value);
             if ( changeSupport != null ) {
-                changeSupport.firePropertyChange(name, oldValue, value);
+                changeSupport.firePropertyChange(name, processOutgoing(oldValue), processOutgoing(value));
             }
         }
     }
 
     @SuppressWarnings({ "UnusedDeclaration" })
     protected void didChange(T oldValue, T newValue) {
+    }
+
+    protected T processIncoming(T value) {
+        return value;
+    }
+
+    protected T processOutgoing(T value) {
+        return value;
     }
 
     public boolean isChange(T value) {
