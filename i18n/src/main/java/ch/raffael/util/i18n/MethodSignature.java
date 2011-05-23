@@ -31,6 +31,7 @@ public final class MethodSignature {
     private final Class<?> returnType;
     private final String name;
     private final List<Argument> arguments;
+    private final Class<?>[] parameterTypes;
 
     private final int selectorCount;
 
@@ -40,11 +41,11 @@ public final class MethodSignature {
     public MethodSignature(Method method) {
         returnType = method.getReturnType();
         name = method.getName();
-        Class<?>[] paramTypes = method.getParameterTypes();
+        parameterTypes = method.getParameterTypes();
         Annotation[][] paramAnnotations = method.getParameterAnnotations();
-        Argument[] args = new Argument[paramTypes.length];
+        Argument[] args = new Argument[parameterTypes.length];
         int selectorCount = 0;
-        for ( int i = 0; i < paramTypes.length; i++ ) {
+        for ( int i = 0; i < parameterTypes.length; i++ ) {
             boolean selector = false;
             for ( Annotation a : paramAnnotations[i] ) {
                 if ( a instanceof Selector ) {
@@ -52,7 +53,7 @@ public final class MethodSignature {
                     selector = true;
                 }
             }
-            args[i] = new Argument(paramTypes[i], selector);
+            args[i] = new Argument(parameterTypes[i], selector);
         }
         arguments = Collections.unmodifiableList(Arrays.asList(args));
         this.selectorCount = selectorCount;
@@ -123,6 +124,10 @@ public final class MethodSignature {
 
     public int getParameterCount() {
         return arguments.size() - selectorCount;
+    }
+
+    public Class<?>[] getParameterTypes() {
+        return Arrays.copyOf(parameterTypes, parameterTypes.length);
     }
 
     public ResourceIndicator getIndicator() {

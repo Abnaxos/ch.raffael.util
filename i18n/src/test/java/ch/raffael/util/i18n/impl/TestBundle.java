@@ -111,14 +111,14 @@ public class TestBundle {
     }
 
     public static interface TestRes extends ResA, ResB {
-        @Forward(ResB.class)
+        @Forward(bundle = ResB.class)
         String ambiguousWithForward();
 
         String mine();
         String parameter(String name);
         String selector(@Selector FooBar sel);
 
-        @Forward(ResC.class)
+        @Forward(bundle = ResC.class)
         String forwarded();
     }
 

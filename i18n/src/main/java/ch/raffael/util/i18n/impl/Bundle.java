@@ -60,7 +60,7 @@ public class Bundle implements InvocationHandler {
     private final Map<ResourcePointer, ResourceHolder> resources = new HashMap<ResourcePointer, ResourceHolder>();
 
     private final Map<ResourceIndicator, MethodSignature> methods = new HashMap<ResourceIndicator, MethodSignature>();
-    private final Map<ResourceIndicator, Bundle> forwards = new HashMap<ResourceIndicator, Bundle>();
+    private final Map<ResourceIndicator, ForwardEntry> forwards = new HashMap<ResourceIndicator, ForwardEntry>();
     private final Map<ResourceIndicator, String> defaults = new HashMap<ResourceIndicator, String>();
 
     private final Map<Method, MethodSignature> signatures = new HashMap<Method, MethodSignature>();
@@ -120,15 +120,31 @@ public class Bundle implements InvocationHandler {
             handler.validateSignature(bundleClass, signature);
             Forward fwd = method.getAnnotation(Forward.class);
             if ( fwd != null ) {
-                Bundle fwdBundle = BundleManager.getInstance().getOrLoad(fwd.value());
-                MethodSignature fwdSignature = fwdBundle.methods.get(signature.getIndicator());
+                Class<? extends ResourceBundle> fwdBundleClass = fwd.bundle();
+                Bundle fwdBundle;
+                if ( fwdBundleClass.isAssignableFrom(bundleClass) ) {
+                    fwdBundle = this;
+                }
+                else {
+                    fwdBundle = BundleManager.getInstance().getOrLoad(fwdBundleClass);
+                }
+                String fwdName = fwd.method();
+                if ( fwdName.isEmpty() ) {
+                    fwdName = signature.getName();
+                }
+                final ResourceIndicator fwdIndicator = new ResourceIndicator(fwdName, signature.getParameterTypes());
+                MethodSignature fwdSignature = fwdBundle.methods.get(fwdIndicator);
+                if ( fwdSignature == null ) {
+                    throw new I18NException("Unresolvable forward: " + fwdBundleClass.getName() + "::" + fwdIndicator);
+                }
                 try {
                     signature.checkCompatibility(fwdSignature);
                 }
                 catch ( I18NException e ) {
                     throw new I18NException(method + ": Forward to incompatible method: " + Util.resourceString(fwdBundle.getBundleClass(), fwdSignature), e);
                 }
-                forwards.put(signature.getIndicator(), fwdBundle);
+                ForwardEntry entry = new ForwardEntry(fwdBundle, fwdSignature);
+                forwards.put(signature.getIndicator(), entry);
             }
             Default def = method.getAnnotation(Default.class);
             if ( def != null ) {
@@ -226,9 +242,9 @@ public class Bundle implements InvocationHandler {
             return resources.get(ptr);
         }
         // check for forward
-        Bundle fwd = forwards.get(ptr.getSignature().getIndicator());
+        ForwardEntry fwd = forwards.get(ptr.getSignature().getIndicator());
         if ( fwd != null ) {
-            ResourceHolder res = fwd.lookup(ptr);
+            ResourceHolder res = fwd.bundle.lookup(new ResourcePointer(fwd.signature, ptr.getSelectors(), ptr.getLocaleSearch()));
             resources.put(ptr, res);
             return res;
         }
@@ -417,6 +433,16 @@ public class Bundle implements InvocationHandler {
         @Override
         public Class<T> type() {
             return (Class<T>)signature.getReturnType();
+        }
+    }
+
+    private class ForwardEntry {
+        private final Bundle bundle;
+        private final MethodSignature signature;
+
+        private ForwardEntry(Bundle bundle, MethodSignature signature) {
+            this.bundle = bundle;
+            this.signature = signature;
         }
     }
 

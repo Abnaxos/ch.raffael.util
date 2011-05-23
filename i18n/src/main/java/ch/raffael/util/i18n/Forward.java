@@ -29,6 +29,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Forward {
 
-    Class<? extends ResourceBundle> value();
+    Class<? extends ResourceBundle> bundle() default ResourceBundle.class;
+
+    String method() default "";
 
 }
