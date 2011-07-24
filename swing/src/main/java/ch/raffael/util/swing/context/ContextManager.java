@@ -88,6 +88,10 @@ public class ContextManager {
         return INSTANCE;
     }
 
+    public static Context context(@NotNull Component component) {
+        return getInstance().require(component);
+    }
+
     @NotNull
     public Context getRoot() {
         return root;

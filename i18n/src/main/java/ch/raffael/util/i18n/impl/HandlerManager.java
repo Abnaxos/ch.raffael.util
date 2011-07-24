@@ -18,6 +18,7 @@ package ch.raffael.util.i18n.impl;
 
 import java.awt.Image;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ import ch.raffael.util.i18n.impl.handlers.ImageHandler;
 import ch.raffael.util.i18n.impl.handlers.InputStreamHandler;
 import ch.raffael.util.i18n.impl.handlers.KeyStrokeHandler;
 import ch.raffael.util.i18n.impl.handlers.StringHandler;
+import ch.raffael.util.i18n.impl.handlers.UrlHandler;
 
 
 /**
@@ -57,6 +59,7 @@ public class HandlerManager {
         h.put(InputStream.class, new InputStreamHandler());
         h.put(byte[].class, new ByteArrayHandler());
         h.put(KeyStroke.class, new KeyStrokeHandler());
+        h.put(URL.class, new UrlHandler());
         //h.put(Color.class, null);
         // FIXME: sound
         handlers = h; // JMM: assignment to final field guarantees visibility of the map's contents
