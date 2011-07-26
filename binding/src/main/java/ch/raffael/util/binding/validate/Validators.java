@@ -16,10 +16,17 @@
 
 package ch.raffael.util.binding.validate;
 
+import ch.raffael.util.binding.validate.validators.EMailValidator;
+import ch.raffael.util.binding.validate.validators.NotEmptyValidator;
+
+
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
 public class Validators {
+
+    public static final NotEmptyValidator NOT_EMPTY = new NotEmptyValidator();
+    public static final EMailValidator EMAIL = new EMailValidator();
 
     private Validators() {
     }
@@ -38,4 +45,17 @@ public class Validators {
             return b;
         }
     }
+
+    public static NotEmptyValidator notEmpty() {
+        return NOT_EMPTY;
+    }
+
+    public static EMailValidator email() {
+        return EMAIL;
+    }
+
+    public static <T> OrValidator<T> or(boolean keepWarnings) {
+        return new OrValidator<T>(keepWarnings);
+    }
+
 }

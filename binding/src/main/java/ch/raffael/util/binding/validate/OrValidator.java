@@ -76,5 +76,21 @@ public class OrValidator<T> extends AbstractCompoundValidator<T> {
         }
     }
 
+    @Override
+    public OrValidator<T> add(Validator<T> tValidator) {
+        super.add(tValidator);
+        return this;
+    }
+
+    @Override
+    public OrValidator<T> add(Collection<Validator<T>> validators) {
+        super.add(validators);
+        return this;
+    }
+
+    public OrValidator<T> or(Validator<T> tValidator) {
+        return add(tValidator);
+    }
+
 
 }

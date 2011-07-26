@@ -43,14 +43,19 @@ public class AndValidator<T> extends AbstractCompoundValidator<T> {
     }
 
     @Override
-    public AbstractCompoundValidator<T> add(Validator<T> validator) {
+    public AndValidator<T> add(Validator<T> validator) {
         super.add(validator);
         return this;
     }
 
     @Override
-    public AbstractCompoundValidator<T> add(Collection<Validator<T>> validators) {
+    public AndValidator<T> add(Collection<Validator<T>> validators) {
         super.add(validators);
         return this;
     }
+
+    public AndValidator<T> and(Validator<T> validator) {
+        return add(validator);
+    }
+
 }
