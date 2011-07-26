@@ -179,7 +179,7 @@ public class IconTextFeedback extends JPanel implements Feedback {
     @Override
     public Point translate(Component component, @NotNull Point reference, @NotNull FeedbackPanel.Placement placement) {
         if ( getIcon() != null ) {
-            placement.translate(reference, -getIcon().getIconWidth() / 2, getIcon().getIconHeight() / 2);
+            placement.translate(reference, /*-getIcon().getIconWidth()*/ 0, getIcon().getIconHeight());
             if ( !ignoreBorders && (component instanceof JComponent) ) {
                 Insets insets = ((JComponent)component).getInsets();
                 placement.translate(reference,
