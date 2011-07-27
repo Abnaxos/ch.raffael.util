@@ -105,7 +105,7 @@ public abstract class AbstractPresentationBuilder<T extends Container> implement
                 addFlat(group, true);
             }
             else {
-                Component component = createBuilder(group).init(group).add(group.getActions()).build();
+                Component component = createBuilder(group).build();
                 if ( component != target ) {
                     addComponent(target, component);
                 }
