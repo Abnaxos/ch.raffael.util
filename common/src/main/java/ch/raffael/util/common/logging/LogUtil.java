@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import org.jetbrains.annotations.NotNull;
 
-import ch.raffael.util.common.GetCaller;
+import ch.raffael.util.common.Classes;
 import ch.raffael.util.common.annotations.Utility;
 
 
@@ -46,7 +46,7 @@ public class LogUtil {
 
     @NotNull
     public static Logger getLogger() {
-        return getLogger(GetCaller.getCallerClass(LogUtil.class));
+        return getLogger(Classes.callerClass(LogUtil.class));
     }
 
 }
