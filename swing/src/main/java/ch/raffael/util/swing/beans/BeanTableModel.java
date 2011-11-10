@@ -252,7 +252,7 @@ public class BeanTableModel<T> extends AbstractTableModel {
     public void addBeans(@NotNull Collection<T> beans) {
         if ( !beans.isEmpty() ) {
             int start = beans.size();
-            beans.addAll(beans);
+            this.beans.addAll(beans);
             for ( T bean : beans ) {
                 registerBean(bean);
             }
