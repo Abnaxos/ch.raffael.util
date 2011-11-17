@@ -25,13 +25,31 @@ public class Classes {
     }
 
     @NotNull
-    public static ClassLoader classLoader(@Nullable ClassLoader explicit, @NotNull Class<?> fallback) {
+    public static ClassLoader classLoader() {
+        return classLoader(null, null);
+    }
+
+    @NotNull
+    public static ClassLoader classLoader(@Nullable Class fallback) {
+        return classLoader(null, fallback);
+    }
+
+    @NotNull
+    public static ClassLoader classLoader(@Nullable ClassLoader explicit) {
+        return classLoader(explicit, null);
+    }
+
+    @NotNull
+    public static ClassLoader classLoader(@Nullable ClassLoader explicit, @Nullable Class<?> fallback) {
         if ( explicit != null ) {
             return explicit;
         }
         ClassLoader thread = Thread.currentThread().getContextClassLoader();
         if ( thread != null ) {
             return thread;
+        }
+        if ( fallback == null ) {
+            fallback = callerClass(Classes.class);
         }
         return fallback.getClassLoader();
     }
