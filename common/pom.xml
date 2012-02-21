@@ -25,7 +25,7 @@
   <groupId>ch.raffael.util</groupId>
   <artifactId>cru-common</artifactId>
   <packaging>jar</packaging>
-  <version>1105-SNAPSHOT</version>
+  <version>1.0</version>
 
   <name>ch.raffael.util.common</name>
   <description>
@@ -35,8 +35,16 @@
   <parent>
     <groupId>ch.raffael.util</groupId>
     <artifactId>cru-parent</artifactId>
-    <version>1105-SNAPSHOT</version>
+    <version>1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
 
 </project>

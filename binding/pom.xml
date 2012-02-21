@@ -25,7 +25,7 @@
   <groupId>ch.raffael.util</groupId>
   <artifactId>cru-binding</artifactId>
   <packaging>jar</packaging>
-  <version>1105-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
 
   <name>ch.raffael.util.binding</name>
   <description>
@@ -35,7 +35,7 @@
   <parent>
     <groupId>ch.raffael.util</groupId>
     <artifactId>cru-parent</artifactId>
-    <version>1105-SNAPSHOT</version>
+    <version>1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -43,14 +43,14 @@
     <dependency>
       <groupId>ch.raffael.util</groupId>
       <artifactId>cru-common</artifactId>
-      <version>1105-SNAPSHOT</version>
+      <version>1.0</version>
       <type>jar</type>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>ch.raffael.util</groupId>
       <artifactId>cru-beans</artifactId>
-      <version>1105-SNAPSHOT</version>
+      <version>1.0</version>
       <type>jar</type>
       <scope>compile</scope>
     </dependency>
