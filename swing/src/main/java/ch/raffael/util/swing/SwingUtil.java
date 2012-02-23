@@ -113,7 +113,7 @@ public class SwingUtil {
             }
         }
         else {
-            ListenableFutureTask<T> future = new ListenableFutureTask<T>(callable);
+            ListenableFutureTask<T> future = ListenableFutureTask.create(callable);
             SwingUtilities.invokeLater(future);
             return future;
         }
@@ -124,7 +124,7 @@ public class SwingUtil {
             return Futures.immediateFuture(null);
         }
         else {
-            ListenableFutureTask<Void> future = new ListenableFutureTask<Void>(runnable, null);
+            ListenableFutureTask<Void> future = ListenableFutureTask.create(runnable, null);
             SwingUtilities.invokeLater(future);
             return future;
         }
