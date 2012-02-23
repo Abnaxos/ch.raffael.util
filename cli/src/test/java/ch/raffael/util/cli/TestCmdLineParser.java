@@ -2,6 +2,8 @@ package ch.raffael.util.cli;
 
 import java.io.PrintWriter;
 
+import org.testng.annotations.*;
+
 import com.google.common.io.NullOutputStream;
 
 import ch.raffael.util.common.Token;

@@ -25,7 +25,7 @@
   <groupId>ch.raffael.util</groupId>
   <artifactId>cru-common</artifactId>
   <packaging>jar</packaging>
-  <version>1.0</version>
+  <version>1.1-SNAPSHOT</version>
 
   <name>ch.raffael.util.common</name>
   <description>
