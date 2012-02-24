@@ -16,35 +16,60 @@ public class Token extends TokenMap {
     @NotNull
     @Override
     public Token synchronize() {
-        return new SynchronizedToken();
+        return synchronize(this);
+    }
+
+    @NotNull
+    @Override
+    public Token synchronize(Object sync) {
+        return new SynchronizedToken(sync);
     }
 
     @SuppressWarnings("deprecation")
-    protected class SynchronizedToken extends Token {
-        @Override
-        public synchronized String toString() {
-            return super.toString();
+    protected static class SynchronizedToken extends Token {
+        private final Object sync;
+        protected SynchronizedToken(Object sync) {
+            this.sync = sync;
         }
         @Override
-        public synchronized boolean equals(Object o) {
-            return super.equals(o);
+        public String toString() {
+            synchronized ( sync ) {
+                return super.toString();
+            }
         }
         @Override
-        public synchronized int hashCode() {
-            return super.hashCode();
+        public boolean equals(Object o) {
+            synchronized ( sync ) {
+                return super.equals(o);
+            }
         }
         @Override
-        public synchronized <T> T put(@NotNull Class<T> type, @Nullable Object key, @Nullable T object) {
-            return super.put(type, key, object);
+        public int hashCode() {
+            synchronized ( sync ) {
+                return super.hashCode();
+            }
         }
         @Override
-        public synchronized <T> T get(@NotNull Class<T> type, @Nullable Object key) {
-            return super.get(type, key);
+        public <T> T put(@NotNull Class<T> type, @Nullable Object key, @Nullable T object) {
+            synchronized ( sync ) {
+                return super.put(type, key, object);
+            }
+        }
+        @Override
+        public <T> T get(@NotNull Class<T> type, @Nullable Object key) {
+            synchronized ( sync ) {
+                return super.get(type, key);
+            }
         }
         @NotNull
         @Override
         public Token synchronize() {
-            return this;
+            return synchronize(this);
+        }
+        @NotNull
+        @Override
+        public Token synchronize(Object sync) {
+            throw new IllegalStateException("Already synchronized");
         }
     }
 
