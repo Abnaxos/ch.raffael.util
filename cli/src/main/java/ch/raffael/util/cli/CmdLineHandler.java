@@ -2,7 +2,7 @@ package ch.raffael.util.cli;
 
 import java.io.PrintWriter;
 
-import ch.raffael.util.common.Token;
+import ch.raffael.util.common.collections.TokenMap;
 
 
 /**
@@ -10,10 +10,10 @@ import ch.raffael.util.common.Token;
 */
 public interface CmdLineHandler {
 
-    Mode command(PrintWriter output, Token token, String prefix, String cmd) throws Exception;
-    Mode value(PrintWriter output, Token token, String name, String value) throws Exception;
-    Mode value(PrintWriter output, Token token, String name, String[] value) throws Exception;
-    void end(PrintWriter output, Token token, String endOfLine) throws Exception;
+    Mode command(PrintWriter output, TokenMap tokenMap, String prefix, String cmd) throws Exception;
+    Mode value(PrintWriter output, TokenMap tokenMap, String name, String value) throws Exception;
+    Mode value(PrintWriter output, TokenMap tokenMap, String name, String[] value) throws Exception;
+    void end(PrintWriter output, TokenMap tokenMap, String endOfLine) throws Exception;
     void help(PrintWriter output);
 
     enum Mode {

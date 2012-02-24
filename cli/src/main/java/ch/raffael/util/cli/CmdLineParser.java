@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.google.common.base.Throwables;
 
-import ch.raffael.util.common.Token;
+import ch.raffael.util.common.collections.TokenMap;
 
 
 /**
@@ -17,7 +17,7 @@ public class CmdLineParser {
     private final Tokenizer tokenizer;
     private final HandlerWrapper handler;
     private final PrintWriter output;
-    private Token token;
+    private TokenMap tokenMap;
 
     public CmdLineParser(CharSequence source, PrintWriter output, CmdLineHandler handler) {
         this.output = output;
@@ -26,7 +26,7 @@ public class CmdLineParser {
     }
 
     public void parse() throws CmdLineException {
-        this.token = new Token();
+        this.tokenMap = new TokenMap();
         CmdToken tok = tokenizer.nextToken();
         TokenType.WORD.checkType(tok);
         CmdToken next = tokenizer.nextToken();
@@ -34,15 +34,15 @@ public class CmdLineParser {
         if ( next.getType() == TokenType.COLON ) {
             next = tokenizer.nextToken();
             TokenType.WORD.checkType(next);
-            mode = handler.command(output, token, tok.getValue(), next.getValue());
+            mode = handler.command(output, tokenMap, tok.getValue(), next.getValue());
         }
         else {
             tokenizer.pushback(next);
-            mode = handler.command(output, token, null, tok.getValue());
+            mode = handler.command(output, tokenMap, null, tok.getValue());
         }
         tok = tokenizer.nextToken();
         if ( mode == CmdLineHandler.Mode.END_OF_LINE ) {
-            handler.end(output, token, tokenizer.toEndOfLine(tok));
+            handler.end(output, tokenMap, tokenizer.toEndOfLine(tok));
             return;
         }
         while ( tok.getType() != TokenType.END ) {
@@ -52,7 +52,7 @@ public class CmdLineParser {
             }
             tok = tokenizer.nextToken();
         }
-        handler.end(output, token, null);
+        handler.end(output, tokenMap, null);
     }
 
     public boolean argument() throws CmdLineException {
@@ -62,8 +62,8 @@ public class CmdLineParser {
         switch ( next.getType() ) {
             case WORD:
                 tokenizer.pushback(next);
-                if ( handler.value(output, token, null, tok.getValue()) == CmdLineHandler.Mode.END_OF_LINE ) {
-                    handler.end(output, token, tokenizer.toEndOfLine(tok));
+                if ( handler.value(output, tokenMap, null, tok.getValue()) == CmdLineHandler.Mode.END_OF_LINE ) {
+                    handler.end(output, tokenMap, tokenizer.toEndOfLine(tok));
                     return false;
                 }
                 else {
@@ -72,8 +72,8 @@ public class CmdLineParser {
             case COLON:
                 return namedArgument(tok);
             case COMMA:
-                if ( handler.value(output, token, null, toStringArray(list(tok))) == CmdLineHandler.Mode.END_OF_LINE ) {
-                    handler.end(output, token, tokenizer.toEndOfLine(tok));
+                if ( handler.value(output, tokenMap, null, toStringArray(list(tok))) == CmdLineHandler.Mode.END_OF_LINE ) {
+                    handler.end(output, tokenMap, tokenizer.toEndOfLine(tok));
                     return false;
                 }
                 else {
@@ -81,8 +81,8 @@ public class CmdLineParser {
                 }
             case END:
                 tokenizer.pushback(next);
-                if ( handler.value(output, token, null, tok.getValue()) == CmdLineHandler.Mode.END_OF_LINE ) {
-                    handler.end(output, token, tok.getValue());
+                if ( handler.value(output, tokenMap, null, tok.getValue()) == CmdLineHandler.Mode.END_OF_LINE ) {
+                    handler.end(output, tokenMap, tok.getValue());
                     return false;
                 }
                 else {
@@ -98,14 +98,14 @@ public class CmdLineParser {
         CmdToken next = tokenizer.nextToken();
         CmdLineHandler.Mode mode;
         if ( next.getType() == TokenType.COMMA ) {
-            mode = handler.value(output, token, name.getValue(), toStringArray(list(tok)));
+            mode = handler.value(output, tokenMap, name.getValue(), toStringArray(list(tok)));
         }
         else {
             tokenizer.pushback(next);
-            mode = handler.value(output, token, name.getValue(), tok.getValue());
+            mode = handler.value(output, tokenMap, name.getValue(), tok.getValue());
         }
         if ( mode == CmdLineHandler.Mode.END_OF_LINE ) {
-            handler.end(output, token, tokenizer.toEndOfLine(tok));
+            handler.end(output, tokenMap, tokenizer.toEndOfLine(tok));
             return false;
         }
         else {
@@ -418,36 +418,36 @@ public class CmdLineParser {
             this.delegate = delegate;
         }
         @Override
-        public Mode command(PrintWriter output, Token token, String prefix, String cmd) throws CmdLineException {
+        public Mode command(PrintWriter output, TokenMap tokenMap, String prefix, String cmd) throws CmdLineException {
             try {
-                return delegate.command(output, token, prefix, cmd);
+                return delegate.command(output, tokenMap, prefix, cmd);
             }
             catch ( Exception e ) {
                 throw propagate(e);
             }
         }
         @Override
-        public Mode value(PrintWriter output, Token token, String name, String value) throws CmdLineException {
+        public Mode value(PrintWriter output, TokenMap tokenMap, String name, String value) throws CmdLineException {
             try {
-                return delegate.value(output, token, name, value);
+                return delegate.value(output, tokenMap, name, value);
             }
             catch ( Exception e ) {
                 throw propagate(e);
             }
         }
         @Override
-        public Mode value(PrintWriter output, Token token, String name, String[] value) throws CmdLineException {
+        public Mode value(PrintWriter output, TokenMap tokenMap, String name, String[] value) throws CmdLineException {
             try {
-                return delegate.value(output, token, name, value);
+                return delegate.value(output, tokenMap, name, value);
             }
             catch ( Exception e ) {
                 throw propagate(e);
             }
         }
         @Override
-        public void end(PrintWriter output, Token token, String endOfLine) throws CmdLineException {
+        public void end(PrintWriter output, TokenMap tokenMap, String endOfLine) throws CmdLineException {
             try {
-                delegate.end(output, token, endOfLine);
+                delegate.end(output, tokenMap, endOfLine);
             }
             catch ( Exception e ) {
                 throw propagate(e);

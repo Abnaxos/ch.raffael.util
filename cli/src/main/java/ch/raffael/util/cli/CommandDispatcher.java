@@ -10,7 +10,7 @@ import java.util.Map;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 
-import ch.raffael.util.common.Token;
+import ch.raffael.util.common.collections.TokenMap;
 
 
 /**
@@ -84,26 +84,26 @@ public class CommandDispatcher {
         return new CmdLineHandler() {
             private CmdLineHandler delegate;
             @Override
-            public Mode command(PrintWriter output, Token token, String prefix, String cmd) throws Exception {
+            public Mode command(PrintWriter output, TokenMap tokenMap, String prefix, String cmd) throws Exception {
                 CmdName cmdName = new CmdName(prefix, cmd);
                 CmdEntry entry = commands.get(cmdName);
                 if ( entry == null || entry.handler == null ) {
                     throw new CmdLineSyntaxException("No such command: " + cmdName);
                 }
                 delegate = entry.handler;
-                return delegate.command(output, token, prefix, cmd);
+                return delegate.command(output, tokenMap, prefix, cmd);
             }
             @Override
-            public Mode value(PrintWriter output, Token token, String name, String value) throws Exception {
-                return delegate.value(output, token, name, value);
+            public Mode value(PrintWriter output, TokenMap tokenMap, String name, String value) throws Exception {
+                return delegate.value(output, tokenMap, name, value);
             }
             @Override
-            public Mode value(PrintWriter output, Token token, String name, String[] value) throws Exception {
-                return delegate.value(output, token, name, value);
+            public Mode value(PrintWriter output, TokenMap tokenMap, String name, String[] value) throws Exception {
+                return delegate.value(output, tokenMap, name, value);
             }
             @Override
-            public void end(PrintWriter output, Token token, String endOfLine) throws Exception {
-                delegate.end(output, token, endOfLine);
+            public void end(PrintWriter output, TokenMap tokenMap, String endOfLine) throws Exception {
+                delegate.end(output, tokenMap, endOfLine);
             }
             @Override
             public void help(PrintWriter output) {

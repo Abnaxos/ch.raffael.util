@@ -19,7 +19,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Supplier;
 import com.google.common.base.Throwables;
 
-import ch.raffael.util.common.Token;
+import ch.raffael.util.common.collections.TokenMap;
 
 
 /**
@@ -237,14 +237,14 @@ public class ReflectionHandler implements CmdLineHandler {
     }
 
     @Override
-    public Mode command(PrintWriter output, Token token, String prefix, String cmd) throws CmdLineSyntaxException {
-        token.put(Object[].class, this, new Object[args.length]);
+    public Mode command(PrintWriter output, TokenMap tokenMap, String prefix, String cmd) throws CmdLineSyntaxException {
+        tokenMap.put(Object[].class, this, new Object[args.length]);
         return Mode.PARSE;
     }
 
     @Override
-    public Mode value(PrintWriter output, Token token, String name, String value) throws CmdLineSyntaxException {
-        Object[] values = token.require(Object[].class, this);
+    public Mode value(PrintWriter output, TokenMap tokenMap, String name, String value) throws CmdLineSyntaxException {
+        Object[] values = tokenMap.require(Object[].class, this);
         if ( name != null ) {
             int index = indexOfArg(name);
             if ( index < 0 ) {
@@ -328,13 +328,13 @@ public class ReflectionHandler implements CmdLineHandler {
     }
 
     @Override
-    public Mode value(PrintWriter output, Token token, String name, String[] value) throws CmdLineSyntaxException {
-        Object[] values = token.require(Object[].class, this);
+    public Mode value(PrintWriter output, TokenMap tokenMap, String name, String[] value) throws CmdLineSyntaxException {
+        Object[] values = tokenMap.require(Object[].class, this);
         if ( value.length == 0 ) {
             return Mode.PARSE;
         }
         if ( value.length == 1 ) {
-            return value(output, token, name, value[0]);
+            return value(output, tokenMap, name, value[0]);
         }
         if ( name != null ) {
             int index = indexOfArg(name);
@@ -384,8 +384,8 @@ public class ReflectionHandler implements CmdLineHandler {
     }
 
     @Override
-    public void end(PrintWriter output, Token token, String endOfLine) throws Exception {
-        Object[] values = token.require(Object[].class, this);
+    public void end(PrintWriter output, TokenMap tokenMap, String endOfLine) throws Exception {
+        Object[] values = tokenMap.require(Object[].class, this);
         try {
             if ( endOfLine != null ) {
                 assert args.length > 0 && (args[args.length - 1].mode() == Argument.Mode.END || args[args.length - 1].mode() == Argument.Mode.END_PREFER) :
