@@ -1,5 +1,6 @@
 package ch.raffael.util.common.collections;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +11,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class TokenMap {
+public class TokenMap implements Serializable {
+    private static final long serialVersionUID = 12022401L;
 
     private final Map<Key, Object> map = new HashMap<Key, Object>();
 
@@ -124,6 +126,7 @@ public class TokenMap {
     }
 
     protected static class SynchronizedTokenMap extends TokenMap {
+        private static final long serialVersionUID = 12022401L;
         private final Object sync;
         protected SynchronizedTokenMap(Object sync) {
             this.sync = sync;

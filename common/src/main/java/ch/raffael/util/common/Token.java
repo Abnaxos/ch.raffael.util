@@ -12,6 +12,7 @@ import ch.raffael.util.common.collections.TokenMap;
  */
 @Deprecated
 public class Token extends TokenMap {
+    private static final long serialVersionUID = 12022401L;
 
     @NotNull
     @Override
@@ -27,6 +28,7 @@ public class Token extends TokenMap {
 
     @SuppressWarnings("deprecation")
     protected static class SynchronizedToken extends Token {
+        private static final long serialVersionUID = 12022401L;
         private final Object sync;
         protected SynchronizedToken(Object sync) {
             this.sync = sync;

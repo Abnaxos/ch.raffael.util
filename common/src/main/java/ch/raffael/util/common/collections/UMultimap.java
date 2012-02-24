@@ -16,6 +16,8 @@
 
 package ch.raffael.util.common.collections;
 
+import java.io.Serializable;
+
 import com.google.common.collect.ForwardingMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -25,7 +27,8 @@ import com.google.common.collect.Multimaps;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class UMultimap<K, V> extends ForwardingMultimap<K, V> {
+public class UMultimap<K, V> extends ForwardingMultimap<K, V> implements Serializable {
+    private static final long serialVersionUID = 12022401L;
 
     private final Multimap<K, V> delegate;
     private final Multimap<K, V> unmodifiable;

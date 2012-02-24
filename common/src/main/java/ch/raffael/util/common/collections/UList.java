@@ -16,6 +16,7 @@
 
 package ch.raffael.util.common.collections;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,8 +27,9 @@ import com.google.common.collect.ForwardingList;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class UList<T> extends ForwardingList<T> {
-
+public class UList<T> extends ForwardingList<T> implements Serializable {
+    private static final long serialVersionUID = 12022401L;
+    
     private final List<T> delegate;
     private final List<T> unmodifiable;
 

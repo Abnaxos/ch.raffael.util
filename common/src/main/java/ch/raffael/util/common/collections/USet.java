@@ -16,6 +16,7 @@
 
 package ch.raffael.util.common.collections;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +27,8 @@ import com.google.common.collect.ForwardingSet;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class USet<T> extends ForwardingSet<T> {
+public class USet<T> extends ForwardingSet<T> implements Serializable {
+    private static final long serialVersionUID = 12022401L;
 
     private final Set<T> delegate;
     private final Set<T> unmodifiable;

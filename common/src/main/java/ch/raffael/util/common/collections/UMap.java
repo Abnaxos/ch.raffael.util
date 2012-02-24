@@ -16,6 +16,7 @@
 
 package ch.raffael.util.common.collections;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +27,8 @@ import com.google.common.collect.ForwardingMap;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class UMap<K, V> extends ForwardingMap<K, V> {
+public class UMap<K, V> extends ForwardingMap<K, V> implements Serializable {
+    private static final long serialVersionUID = 12022401L;
 
     private final Map<K, V> delegate;
     private final Map<K, V> unmodifiable;
