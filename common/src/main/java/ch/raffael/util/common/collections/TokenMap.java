@@ -38,6 +38,30 @@ public class TokenMap implements Serializable {
         return map.hashCode();
     }
 
+    public void putAll(TokenMap that) {
+        putAll(that.getAll());
+    }
+
+    public void putAllAbsent(TokenMap that) {
+        putAllAbsent(that.getAll());
+    }
+
+    protected void putAll(Map<Key, Object> map) {
+        this.map.putAll(map);
+    }
+
+    protected void putAllAbsent(Map<Key, Object> map) {
+        for ( Map.Entry<Key, Object> entry : map.entrySet() ) {
+            if ( !this.map.containsKey(entry.getKey()) ) {
+                this.map.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    protected Map<Key, Object> getAll() {
+        return map;
+    }
+    
     @Nullable
     public <T> T put(@NotNull Class<T> type, @Nullable T object) {
         return put(type, null, object);
@@ -89,7 +113,7 @@ public class TokenMap implements Serializable {
         return new SynchronizedTokenMap(sync);
     }
 
-    private final static class Key {
+    protected final static class Key {
         private final Class<?> clazz;
         private final Object key;
         private Key(Class<?> clazz, Object key) {
@@ -147,6 +171,24 @@ public class TokenMap implements Serializable {
         public int hashCode() {
             synchronized ( sync ) {
                 return super.hashCode();
+            }
+        }
+        @Override
+        protected void putAll(Map<Key, Object> map) {
+            synchronized ( sync ) {
+                super.putAll(map);
+            }
+        }
+        @Override
+        protected void putAllAbsent(Map<Key, Object> map) {
+            synchronized ( sync ) {
+                super.putAll(map);
+            }
+        }
+        @Override
+        protected Map<Key, Object> getAll() {
+            synchronized ( sync ) {
+                return new HashMap<Key, Object>(super.getAll());
             }
         }
         @Override

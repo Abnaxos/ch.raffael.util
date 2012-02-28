@@ -1,5 +1,8 @@
 package ch.raffael.util.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,6 +52,24 @@ public class Token extends TokenMap {
         public int hashCode() {
             synchronized ( sync ) {
                 return super.hashCode();
+            }
+        }
+        @Override
+        protected void putAll(Map<Key, Object> map) {
+            synchronized ( sync ) {
+                super.putAll(map);
+            }
+        }
+        @Override
+        protected void putAllAbsent(Map<Key, Object> map) {
+            synchronized ( sync ) {
+                super.putAll(map);
+            }
+        }
+        @Override
+        protected Map<Key, Object> getAll() {
+            synchronized ( sync ) {
+                return new HashMap<Key, Object>(super.getAll());
             }
         }
         @Override
