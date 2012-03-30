@@ -166,13 +166,6 @@
         </configuration>
       </plugin>
     </plugins>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ftp</artifactId>
-        <version>2.2</version>
-      </extension>
-    </extensions>
   </build>
 
   <repositories>
@@ -186,7 +179,7 @@
   <distributionManagement>
     <repository>
       <id>deploy.maven.raffael.ch</id>
-      <url>ftp://maven.raffael.ch/repository</url>
+      <url>http://maven.raffael.ch/</url>
     </repository>
   </distributionManagement>
 
