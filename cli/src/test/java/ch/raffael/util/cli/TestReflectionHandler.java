@@ -137,7 +137,7 @@ public class TestReflectionHandler {
         test("cmd noint", cmd, "Invalid .* value");
     }
 
-    @Test
+    @Test(enabled = false)
     public void testFlag() throws Exception {
         Verifiable cmd = new Verifiable() {
             @Command(name = "cmd")
