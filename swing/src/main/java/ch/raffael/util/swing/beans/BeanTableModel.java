@@ -38,6 +38,7 @@ import javax.swing.table.TableColumn;
 
 import org.slf4j.Logger;
 
+import com.google.common.primitives.Primitives;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -323,7 +324,7 @@ public class BeanTableModel<T> extends AbstractTableModel {
     @Override
     @NotNull
     public Class<?> getColumnClass(int columnIndex) {
-        return columns.get(columnIndex).property.getPropertyType();
+        return Primitives.wrap(columns.get(columnIndex).property.getPropertyType());
     }
 
     @Override
