@@ -66,6 +66,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.spockframework</groupId>
+      <artifactId>spock-core</artifactId>
+      <version>0.6-groovy-1.8</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <version>6.0.1</version>
@@ -164,6 +170,67 @@
             <supportedProjectType>jar</supportedProjectType>
           </supportedProjectTypes>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>test-testng</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <junitArtifactName>disabled:disabled</junitArtifactName>
+            </configuration>
+          </execution>
+          <execution>
+            <id>test-spock</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <testNGArtifactName>disabled:disabled</testNGArtifactName>
+              <includes>
+                <include>**/*Spec.class</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.gmaven</groupId>
+        <artifactId>gmaven-plugin</artifactId>
+        <version>1.4</version>
+        <!--suppress MavenModelInspection -->
+        <configuration>
+          <providerSelection>1.8</providerSelection>
+        </configuration>
+        <executions>
+          <execution>
+            <id>spock-test-compile</id>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.gmaven.runtime</groupId>
+            <artifactId>gmaven-runtime-1.8</artifactId>
+            <version>1.4</version>
+            <exclusions>
+              <exclusion>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+              </exclusion>
+            </exclusions>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>1.8.6</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
