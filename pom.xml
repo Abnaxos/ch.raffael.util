@@ -32,6 +32,15 @@
     A set of some utilities for various purposes.
   </description>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <slf4j.version>1.6.6</slf4j.version>
+    <!-- NOTE: Groovy 1.8.6 causes a VerifyError ("Stack size to large") on cli/ReflectionHandlerSpec
+         Need to figure out why ... :( For now, just use Groovy 1.8.5
+    -->
+    <groovy.version>1.8.5</groovy.version>
+  </properties>
+
   <licenses>
     <license>
       <name>Apache Software License, Version 2.0</name>
@@ -60,7 +69,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.1</version>
+      <version>${slf4j.version}</version>
       <type>jar</type>
       <scope>compile</scope>
     </dependency>
@@ -72,30 +81,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>6.0.1</version>
-      <type>jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymock</artifactId>
-      <version>3.0</version>
-      <type>jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.6.1</version>
-      <type>jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
       <type>jar</type>
       <scope>test</scope>
     </dependency>
@@ -106,7 +94,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>11.0.1</version>
+        <version>12.0</version>
         <type>jar</type>
         <scope>compile</scope>
       </dependency>
@@ -173,29 +161,11 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>test-testng</id>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <junitArtifactName>disabled:disabled</junitArtifactName>
-            </configuration>
-          </execution>
-          <execution>
-            <id>test-spock</id>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <testNGArtifactName>disabled:disabled</testNGArtifactName>
-              <includes>
-                <include>**/*Spec.class</include>
-              </includes>
-            </configuration>
-          </execution>
-        </executions>
+        <configuration>
+          <includes>
+            <include>**/*Spec.class</include>
+          </includes>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.gmaven</groupId>
@@ -228,7 +198,7 @@
           <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>1.8.6</version>
+            <version>${groovy.version}</version>
           </dependency>
         </dependencies>
       </plugin>
