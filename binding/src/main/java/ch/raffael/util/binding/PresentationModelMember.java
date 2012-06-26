@@ -13,7 +13,9 @@ public class PresentationModelMember {
 
     protected <T extends PresentationModelMember> T add(T member) {
         member.presentationModel = presentationModel;
-        presentationModel.add(member);
+        if ( presentationModel != null ) {
+            presentationModel.add(member);
+        }
         return member;
     }
 
