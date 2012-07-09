@@ -26,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -68,6 +69,17 @@ public class SwingUtil {
 
         @Override
         public void focusLost(FocusEvent e) {
+        }
+    };
+    private static final Executor EDT_EXECUTOR = new Executor() {
+        @Override
+        public void execute(Runnable command) {
+            if ( SwingUtilities.isEventDispatchThread() ) {
+                command.run();
+            }
+            else {
+                SwingUtilities.invokeLater(command);
+            }
         }
     };
 
@@ -137,6 +149,10 @@ public class SwingUtil {
         ActionEvent evt = new ActionEvent(source, ActionEvent.ACTION_PERFORMED, (String)action.getValue(Action.ACTION_COMMAND_KEY), 0);
         action.actionPerformed(evt);
         return true;
+    }
+
+    public static Executor edtExecutor() {
+        return EDT_EXECUTOR;
     }
 
     public static JRootPane findRootPane(Component component) {
