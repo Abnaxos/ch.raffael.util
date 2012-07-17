@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>ch.raffael.util.contracts</groupId>
+  <artifactId>cru-contracts-agent</artifactId>
+  <packaging>jar</packaging>
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description></description>
+
+  <parent>
+    <artifactId>cru-contracts</artifactId>
+    <groupId>ch.raffael.util.contracts</groupId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>ch.raffael.util.contracts</groupId>
+      <artifactId>cru-contracts-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!--<plugin>-->
+        <!--<artifactId>maven-jar-plugin</artifactId>-->
+        <!--<version>2.3.1</version>-->
+        <!--<executions>-->
+          <!--<execution>-->
+            <!--<id>agent-dummy-jar</id>-->
+            <!--<phase>generate-resources</phase>-->
+            <!--<goals>-->
+              <!--<goal>jar</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+              <!--<finalName>agent-dummy-jar</finalName>-->
+              <!--<excludes>-->
+                <!--<exclude>**/*</exclude>-->
+              <!--</excludes>-->
+            <!--</configuration>-->
+          <!--</execution>-->
+        <!--</executions>-->
+        <!--<configuration>-->
+          <!--<archive>-->
+            <!--<manifestEntries>-->
+              <!--<Premain-Class>ch.raffael.contracts.agent.ContractsManager</Premain-Class>-->
+            <!--</manifestEntries>-->
+          <!--</archive>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
+    </plugins>
+  </build>
+
+</project>
