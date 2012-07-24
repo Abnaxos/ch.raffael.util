@@ -9,13 +9,32 @@ options {
 
 tokens {
 	IF		= 'if';
+	FOR		= 'for';
 	FINALLY 	= 'finally';
+	TRUE		= 'true';
+	FALSE		= 'false';
+	NULL		= 'null';
+	CLASS		= 'class';
+	
+	TINT		= 'int';
+	TLONG		= 'long';
+	TSHORT		= 'short';
+	TBYTE		= 'byte';
+	TBOOLEAN	= 'boolean';
+	TFLOAT		= 'float';
+	TDOUBLE		= 'double';
+	TCHAR		= 'char';
+	TVOID		= 'void';
+	
+	THIS		= 'this';
+	SUPER		= 'super';
 	
 	PRE		= '@pre';
 	THROWN		= '@thrown';
 	EQUALS		= '@equals';
 	PARAM		= '@param';
 	RESULT		= '@result';
+	EACH		= '@each';
 	
 	CONDITIONAL	= '?';
 	
@@ -53,13 +72,16 @@ tokens {
 	INDEX_CLOSE	= ']';
 	
 	DEREFERENCE	= '.';
-		
+	COLON		= ':';
+	CLOSURE		= '->';
+	
 	CONDITION;
 	POS;
 	NEG;
 	CAST;
 	CALL;
 	INDEX;
+	ARRAY;
 }
 
 @parser::header {
@@ -70,23 +92,23 @@ package ch.raffael.util.contracts.processor.expr;
 package ch.raffael.util.contracts.processor.expr;
 }
 
-@members {
-/*    private List<Problem> problems = new java.util.LinkedList<Problem>();
-    public List<Problem> getProblems() { return problems; }
-    @Override
-    public void displayRecognitionError(String[] tokenNames, RecognitionException e) {
-        String msg = getErrorMessage(e, tokenNames);
-        if ( !msg.isEmpty() && !Character.isUpperCase(msg.charAt(1)) )
-            msg = Character.toUpperCase(msg.charAt(0))+msg.substring(1);
-        problems.add(new Problem(e, msg));
-    }*/
-}
-
 condition
 	:	FINALLY?
-		( IF '(' ifexpr=expression ')' )? expr=expression
+		fullExpression
 		EOF
-	-> ^(CONDITION FINALLY? ^(IF $ifexpr)? $expr)
+	-> ^(CONDITION FINALLY? fullExpression)
+	;
+
+/*ifExpression
+	:	(IF PAREN_OPEN! expression PAREN_CLOSE!)* expression
+	;*/
+
+fullExpression
+	:	ifExpression* expression
+	;
+
+ifExpression
+	:	IF^ PAREN_OPEN! expression PAREN_CLOSE!
 	;
 
 expression
@@ -115,7 +137,7 @@ equality2
 	:	shift ( (GE|GT|LT|LE)^ shift)*
 	;
 instanceOf
-	:	shift INSTANCEOF^ type
+	:	shift INSTANCEOF^ typeref
 	;
 
 shift	:	addition ( (LEFT_SHIFT|RIGHT_SHIFT|URIGHT_SHIFT)^ addition )*
@@ -126,44 +148,57 @@ addition:	multiplication ( (ADD|SUB)^ multiplication )*
 multiplication
 	:	unary ( (MUL|DIV|MOD)^ unary )*
 	;
+	
+unary	:	add=ADD unary -> ^(POS[$add] unary)
+	|	sub=SUB unary -> ^(NEG[$sub] unary)
+	|	unary2
+	;
+unary2	:	BITWISE_NOT^ unary
+	|	LOGICAL_NOT^ unary
+	|	cast
+	|	factor selector^*
+	;
+cast	:	paren=PAREN_OPEN primitiveType PAREN_CLOSE unary -> ^(CAST[$paren] primitiveType unary)
+	|	paren=PAREN_OPEN typeref PAREN_CLOSE unary2 -> ^(CAST[$paren] typeref unary2)
+	;
 
-unary	: prefix|postfix; // don't understand why I had to do this, but oh, well ...
-prefix	:
-	(	ADD unary
-		-> ^(POS unary)
-	|	SUB unary
-		-> ^(NEG unary)
-	|	BITWISE_NOT unary
-		-> ^(BITWISE_NOT unary)
-	|	LOGICAL_NOT unary
-		-> ^(LOGICAL_NOT unary)
-	|	PAREN_OPEN type PAREN_CLOSE unary
-		-> ^(CAST type unary)
-	)
+selector:	DEREFERENCE member=ID -> ^(DEREFERENCE[$member])
+	|	DEREFERENCE method=ID PAREN_OPEN argList? PAREN_CLOSE -> ^(CALL[$method] argList*)
+	|	index=INDEX_OPEN expression INDEX_CLOSE -> ^(INDEX[$index] expression)
 	;
-postfix	:	factor postfixOp^*
-	;
-postfixOp
-	:	
-	(	DEREFERENCE ID -> ^(DEREFERENCE ID)
-	|	PAREN_OPEN argList? PAREN_CLOSE -> ^(CALL argList?)
-	|	INDEX_OPEN expression INDEX_CLOSE -> ^(INDEX expression)
-	)
-	;	
-factor	:	(ID|INT|FLOAT|STRING|CHAR|function|(PAREN_OPEN! expression PAREN_CLOSE!));
+	
+factor	:
+	(	ID|INT|FLOAT|STRING|CHAR
+	|	TRUE|FALSE|NULL|THIS|SUPER
+	|	( typeref | primitiveType | TVOID ) DEREFERENCE! CLASS^
+	|	call
+	|	function
+	|	(PAREN_OPEN! expression PAREN_CLOSE!));
+call	:	method=ID PAREN_OPEN argList? PAREN_CLOSE -> ^(CALL[$method] argList* THIS);
 
 function:	PRE^ PAREN_OPEN! expression PAREN_CLOSE!
-	|	THROWN^ PAREN_OPEN! type? PAREN_CLOSE!
+	|	THROWN^ PAREN_OPEN! classref? PAREN_CLOSE!
 	|	PARAM^ PAREN_OPEN! ( ((ADD|SUB)? INT | ID) )? PAREN_CLOSE!
 	|	RESULT^ PAREN_OPEN! PAREN_CLOSE!
 	|	EQUALS^ PAREN_OPEN! expression ','! expression PAREN_CLOSE!
+	|	EACH^ PAREN_OPEN! ID COLON! expression CLOSURE! fullExpression PAREN_CLOSE!
 	;
 		
 argList	:	expression ( ','! expression )*
 	;
 
-type
-	:	ID^ ( DEREFERENCE^ ID )* (INDEX_OPEN INDEX_CLOSE!)*
+typeref	:	classref array^*
+	|	primitiveType array^+
+	;
+classref:	ID classDereference^*;
+classDereference
+	:	DEREFERENCE pkgOrCls=ID -> ^(DEREFERENCE[$pkgOrCls]);
+typerefFragment
+	:	ID
+	;
+array	:	arr=INDEX_OPEN INDEX_CLOSE -> ^(ARRAY[$arr]);
+primitiveType
+	:	TINT | TLONG | TSHORT | TBYTE | TDOUBLE | TFLOAT | TCHAR | TBOOLEAN
 	;
 
 ID	:	IDENT;
@@ -179,9 +214,11 @@ INT	:
     ;
 
 FLOAT
-    :   ('0'..'9')+ '.' ('0'..'9')* EXPONENT?
+    :
+    ( ('0'..'9')+ '.' ('0'..'9')* EXPONENT?
     |   '.' ('0'..'9')+ EXPONENT?
     |   ('0'..'9')+ EXPONENT
+    ) ('d'|'D'|'f'|'F')?
     ;
 
 COMMENT

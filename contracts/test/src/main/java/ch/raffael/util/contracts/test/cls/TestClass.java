@@ -8,7 +8,9 @@ import ch.raffael.util.contracts.NotNull;
  */
 public class TestClass {
 
-    private String var = "VAR";
+    protected String var = "VAR";
+    private static Object $1;
+    private static Object test;
 
     @NotNull
     public synchronized Object notNull(Object obj) {
@@ -16,9 +18,13 @@ public class TestClass {
         return obj;
     }
 
+    public <T extends java.util.Date> T erasure(int arg) {
+        return null;
+    }
+
     public class Inner {
         @NotNull
-        public Object method(Object obj) {
+        public Object method(int obj) {
             return obj;
         }
         public class Inner2 {

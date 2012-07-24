@@ -2,6 +2,7 @@ package ch.raffael.util.contracts.processor.expr;
 
 
 import org.antlr.runtime.Token
+import org.spockframework.runtime.ConditionNotSatisfiedError
 import spock.lang.FailsWith
 import spock.lang.Specification
 import spock.util.mop.Use
@@ -23,14 +24,52 @@ class ParserSpec extends Specification {
         thrown(ParseException)
     }
 
+    @FailsWith(
+        value= ConditionNotSatisfiedError,
+        reason = "Should work, actually, but can't find any situation where this happens right now"
+    )
     def "Meta-Test: Report error if not all tokens were consumed"() {
       when:
-        expression("foo bar")
+        fullExpression("foo bar")
 
       then:
         def e = thrown(ParseException)
         e.problems.size() == 1
         e.problems[0].message.startsWith('Not all tokens consumed;')
+    }
+
+    def "Full condition with ifs"() {
+      when:
+        def ast = condition("if(foo) if(bar) foobar")
+
+      then:
+        ast.type == CONDITION
+
+        ast[0].type == IF
+        ast[0][0].tok == [ID, 'foo']
+
+        ast[1].type == IF
+        ast[1][0].tok == [ID, 'bar']
+
+        ast[2].tok == [ID, 'foobar']
+    }
+
+    def "Final full condition with ifs"() {
+      when:
+        def ast = condition("finally if(foo) if(bar) foobar")
+
+      then:
+        ast.type == CONDITION
+
+        ast[0].type == FINALLY
+
+        ast[1].type == IF
+        ast[1][0].tok == [ID, 'foo']
+
+        ast[2].type == IF
+        ast[2][0].tok == [ID, 'bar']
+
+        ast[3].tok == [ID, 'foobar']
     }
 
     def "Simple multiplication"() {
@@ -165,9 +204,81 @@ class ParserSpec extends Specification {
         ast[1].tok == [INT, '2']
     }
 
+    def "Function @each with if"() {
+      when:
+        def ast = fullExpression("@each(foo: myCollection -> if(bar) foobar)")
+
+      then:
+        ast.type == EACH
+        ast[0].tok == [ID, 'foo']
+        ast[1].tok == [ID, 'myCollection']
+        ast[2].type == IF
+        ast[2][0].tok == [ID, 'bar']
+        ast[3].tok == [ID, 'foobar']
+    }
+
+    def "Valid typeref: primitive array"() {
+      when:
+        def ast = typeref('int[]')
+
+      then:
+        ast.type == ARRAY
+        ast[0].type == TINT
+    }
+
+    def "Valid typeref: unqualified class"() {
+      when:
+        def ast = typeref('String')
+
+      then:
+        ast.tok == [ID, 'String']
+    }
+
+    def "Valid typeref: qualified class"() {
+      when:
+        def ast = typeref('java.lang.String')
+
+      then:
+        ast.tok == [DEREFERENCE, 'String']
+        ast[0].tok == [DEREFERENCE, 'lang']
+        ast[0][0].tok == [ID, 'java']
+    }
+
+    def "Valid typeref: qualified class two-dimensional array"() {
+      when:
+        def ast = typeref('java.lang.String[][]')
+
+      then:
+        ast.type == ARRAY
+        ast.down(0)
+        ast.type == ARRAY
+
+        ast.down(0)
+        ast.tok == [DEREFERENCE, 'String']
+        ast[0].tok == [DEREFERENCE, 'lang']
+        ast[0][0].tok == [ID, 'java']
+    }
+
+    def "Some invalid typerefs"() {
+      when:
+        typeref(t)
+
+      then:
+        thrown(ParseException)
+
+      where:
+        t << [  'int.foo',
+                'foo.int',
+                'foo[].bar',
+                'int[].bar',
+                'foo.bar[42]',
+                'int' // valid, but handled separately because of casts
+        ]
+    }
+
     def "Unary positive"() {
       when:
-        def ast = prefix("+1")
+        def ast = unary("+1")
 
       then:
         ast.type == POS
@@ -176,16 +287,27 @@ class ParserSpec extends Specification {
 
     def "Unary negative"() {
       when:
-        def ast = prefix("-42")
+        def ast = unary("-42")
 
       then:
         ast.type == NEG
         ast[0].tok == [INT, '42']
     }
 
+    def "Unary negative in addition"() {
+      when:
+        def ast = expression("foo+-bar")
+
+      then:
+        ast.type == ADD
+        ast[0].tok == [ID, 'foo']
+        ast[1].type == NEG
+        ast[1][0].tok == [ID, 'bar']
+    }
+
     def "Recurse unary"() {
       when:
-        def ast = prefix('-(Integer)42')
+        def ast = unary('-(Integer)42')
 
       then:
         ast.type == NEG
@@ -224,12 +346,11 @@ class ParserSpec extends Specification {
 
       then:
         ast.type == CAST
-        ast[0].tok == [ID, 'int']
+        ast[0].tok == [TINT, 'int']
 
         ast.down(1)
-        ast.type == DEREFERENCE
-        ast[0].tok == [ID, 'bar']
-        ast[1].tok == [ID, 'foo']
+        ast.tok == [DEREFERENCE, 'bar']
+        ast[0].tok == [ID, 'foo']
     }
 
     def "Complex dereference/call/cast/index combination"() {
@@ -241,27 +362,92 @@ class ParserSpec extends Specification {
         ast[0].tok == [INT, '42']
 
         ast.down(1)
-        ast.type == CALL
+        ast.tok == [CALL, 'bar']
         ast[0].type == ADD
         ast[1].type == MUL
 
         ast.down(2)
-        ast.type == DEREFERENCE
-        ast[0].tok == [ID, 'bar']
-
-        ast.down(1)
         ast.type == CAST
-        ast[0].tok == [ID, 'int']
+        ast[0].tok == [TINT, 'int']
 
         ast.down(1)
-        ast.type == DEREFERENCE
-        ast[0].tok == [ID, 'foo']
-        ast[1].tok == [STRING, '"abc"']
+        ast.tok == [DEREFERENCE, 'foo']
+        ast[0].tok == [STRING, '"abc"']
     }
 
-    @FailsWith(AssertionError)
-    def "ADD has priority over POS on single identifier in parentheses (may be mistaken as cast)"() {
+    def "foo.bar.class with call"() {
       when:
+        def ast = expression("foo.bar.class.getName()")
+
+      then:
+        ast.tok == [CALL, 'getName']
+        ast[0].type == CLASS
+
+        ast.down(0, 0)
+        ast.tok == [DEREFERENCE, 'bar']
+        ast[0].tok == [ID, 'foo']
+
+      then:
+        true
+    }
+
+    def "Differentiate between ADD/SUB and POS/NEG with cast"() {
+      when:
+        def ast = expression(expr)
+
+      then:
+        ast.type == type
+
+      where:
+        expr      | type
+        '(a)+(b)' | ADD
+        '(int)+b' | CAST
+        '(a)(+b)' | CAST
+        '(int)(+b)' | CAST
+    }
+
+    def "ADD has priority over POS on single identifier in parentheses (may be mistaken as cast)"() {
+        // Actually, to keep things compatible with Java, we can only
+        // tell the difference between a cast and a identifier in
+        // parentheses after a semantic analysis.
+        // Behaviour of the Java compiler in such cases:
+        //
+        // (a)+1 => Take the value of a and add 1
+        // (int)+1 => Cast +1 to int
+        //
+        // As long as we don't know whether the identifier inside the
+        // parentheses is a type or something else, we cannot distinguish
+        // a cast from an addition in such cases. As soon as we know whether
+        // it's a type or not, there's no doubt.
+        //
+        // Maybe we can do something about this using disambiguating semantic
+        // predicates:
+        // http://stackoverflow.com/questions/3056441/what-is-a-semantic-predicate-in-antlr
+        //
+        // For the scope of CEL, it's sufficient to implement the behaviour
+        // of this Spec, however.
+        //
+        // Note a trick by the Java syntax for ANTLR3:
+        // http://www.antlr.org/grammar/1152141644268/Java.g
+        //
+        // They define a cast as either (primitiveType)unary or (a.b.c)unaryNotPlusMinus
+        //
+        // The case above can actually only happen with casts to long, int, short, byte,
+        // char, float, double. => Only with primitive types except boolean. Which is not
+        // entirely true because of auto-boxing:
+        //   (Integer)+1
+        // However, CEL won't support auto-boxing anyway, because it's dangerous:
+        //   Integer.getInteger(127)==Integer.getInteger(127) => true
+        //   Integer.getInteger(128)==Integer.getInteger(128) => false
+        // So, using this trick here is an option.
+        //
+        // *******************************************************************************
+        //
+        // Final decision: See Spec above "Differentiate between ADD/SUB": Opted for the
+        // last option
+        // Note that actually, javac doesn't support an expression like
+        // (Integer)+42 neither ...
+        when:
         def ast = expression('(a)+1')
 
       then: "This is not a cast"
@@ -274,11 +460,11 @@ class ParserSpec extends Specification {
 
     def "Cast with POS operator in parentheses"() {
       when:
-        def ast = expression('(a)(+1)')
+        def ast = expression('(int)(+1)')
 
       then:
         ast.type == CAST
-        ast[0].tok == [ID, 'a']
+        ast[0].tok == [TINT, 'int']
         ast[1].type == POS
         ast[1][0].tok == [INT, '1']
     }
