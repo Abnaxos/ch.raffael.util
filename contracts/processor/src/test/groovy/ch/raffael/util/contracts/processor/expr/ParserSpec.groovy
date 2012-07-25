@@ -179,13 +179,13 @@ class ParserSpec extends Specification {
         !ast.children
     }
 
-    def "Function @pre()"() {
+    def "Function @old()"() {
       when:
-        def ast = condition(/if(@pre(a==x)) x/)
+        def ast = condition(/if(@old(a==x)) x/)
 
       then:
         ast.down(0, 0)
-        ast.type == PRE
+        ast.type == OLD
         ast[0].type == EQ
     }
 
@@ -215,6 +215,55 @@ class ParserSpec extends Specification {
         ast[2].type == IF
         ast[2][0].tok == [ID, 'bar']
         ast[3].tok == [ID, 'foobar']
+    }
+
+    def "Function @param and @arg are the same"() {
+      when:
+        def ast = fullExpression(expr)
+
+      then:
+        ast.type == PARAM
+        !ast.children
+
+      where:
+        expr << ['@param()', '@arg()']
+    }
+
+    def "Function @param with name"() {
+      when:
+        def ast = fullExpression("@param(myParam)")
+
+      then:
+        ast.type == PARAM
+        ast.children.size == 1
+        ast[0].tok == [ID, 'myParam']
+    }
+
+    def "Function @param with relative index"() {
+      when:
+        def ast = fullExpression(expr)
+
+      then:
+        ast.type == PARAM
+        ast.children.size == 2
+        ast[0].type == rel
+        ast[1].tok == [INT, idx]
+
+      where:
+        expr          | rel | idx
+        '@param(+23)' | ADD | '23'
+        '@param(-42)' | SUB | '42'
+    }
+
+    def "@param() with +/- requires an int"() {
+      when:
+        def ast = paramFunction(expr)
+
+      then:
+        thrown ParseException
+
+      where:
+        expr << ['@param(+)', '@param(-)', '@param(+name)', '@param(-name)']
     }
 
     def "Valid typeref: primitive array"() {

@@ -29,10 +29,11 @@ tokens {
 	THIS		= 'this';
 	SUPER		= 'super';
 	
-	PRE		= '@pre';
+	OLD		= '@old';
 	THROWN		= '@thrown';
 	EQUALS		= '@equals';
 	PARAM		= '@param';
+	ARG		= '@arg';
 	RESULT		= '@result';
 	EACH		= '@each';
 	
@@ -131,9 +132,9 @@ bitwiseAnd
 	:	equality ( BITWISE_AND^ equality )*
 	;
 
-equality:	(equality2|instanceOf) ( (EQ|NE)^ (equality2|instanceOf) )*
+equality:	(relational|instanceOf) ( (EQ|NE)^ (relational|instanceOf) )*
 	;
-equality2
+relational
 	:	shift ( (GE|GT|LT|LE)^ shift)*
 	;
 instanceOf
@@ -151,15 +152,15 @@ multiplication
 	
 unary	:	add=ADD unary -> ^(POS[$add] unary)
 	|	sub=SUB unary -> ^(NEG[$sub] unary)
-	|	unary2
+	|	unarynoPosNeg
 	;
-unary2	:	BITWISE_NOT^ unary
+unarynoPosNeg	:	BITWISE_NOT^ unary
 	|	LOGICAL_NOT^ unary
 	|	cast
 	|	factor selector^*
 	;
 cast	:	paren=PAREN_OPEN primitiveType PAREN_CLOSE unary -> ^(CAST[$paren] primitiveType unary)
-	|	paren=PAREN_OPEN typeref PAREN_CLOSE unary2 -> ^(CAST[$paren] typeref unary2)
+	|	paren=PAREN_OPEN typeref PAREN_CLOSE unarynoPosNeg -> ^(CAST[$paren] typeref unarynoPosNeg)
 	;
 
 selector:	DEREFERENCE member=ID -> ^(DEREFERENCE[$member])
@@ -176,12 +177,16 @@ factor	:
 	|	(PAREN_OPEN! expression PAREN_CLOSE!));
 call	:	method=ID PAREN_OPEN argList? PAREN_CLOSE -> ^(CALL[$method] argList* THIS);
 
-function:	PRE^ PAREN_OPEN! expression PAREN_CLOSE!
+function:	OLD^ PAREN_OPEN! expression PAREN_CLOSE!
 	|	THROWN^ PAREN_OPEN! classref? PAREN_CLOSE!
-	|	PARAM^ PAREN_OPEN! ( ((ADD|SUB)? INT | ID) )? PAREN_CLOSE!
+	|	paramFunction
 	|	RESULT^ PAREN_OPEN! PAREN_CLOSE!
 	|	EQUALS^ PAREN_OPEN! expression ','! expression PAREN_CLOSE!
 	|	EACH^ PAREN_OPEN! ID COLON! expression CLOSURE! fullExpression PAREN_CLOSE!
+	;
+paramFunction
+	:	(fun=PARAM|fun=ARG) PAREN_OPEN (((ADD|SUB)? INT) | ID)? PAREN_CLOSE
+	-> ^(PARAM[$fun] ADD? SUB? INT? ID?)
 	;
 		
 argList	:	expression ( ','! expression )*
