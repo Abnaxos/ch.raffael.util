@@ -46,12 +46,12 @@ class ParserSpec extends Specification {
         ast.type == CONDITION
 
         ast[0].type == IF
-        ast[0][0].tok == [ID, 'foo']
+        ast[0][0].tok == [REF, 'foo']
 
         ast[1].type == IF
-        ast[1][0].tok == [ID, 'bar']
+        ast[1][0].tok == [REF, 'bar']
 
-        ast[2].tok == [ID, 'foobar']
+        ast[2].tok == [REF, 'foobar']
     }
 
     def "Final full condition with ifs"() {
@@ -64,12 +64,12 @@ class ParserSpec extends Specification {
         ast[0].type == FINALLY
 
         ast[1].type == IF
-        ast[1][0].tok == [ID, 'foo']
+        ast[1][0].tok == [REF, 'foo']
 
         ast[2].type == IF
-        ast[2][0].tok == [ID, 'bar']
+        ast[2][0].tok == [REF, 'bar']
 
-        ast[3].tok == [ID, 'foobar']
+        ast[3].tok == [REF, 'foobar']
     }
 
     def "Simple multiplication"() {
@@ -81,8 +81,8 @@ class ParserSpec extends Specification {
 
         ast.down(0)
         ast.text == '*'
-        ast[0].tok == [ID, 'x']
-        ast[1].tok == [ID, 'y']
+        ast[0].tok == [REF, 'x']
+        ast[1].tok == [REF, 'y']
         !ast[0].children
         !ast[1].children
     }
@@ -95,16 +95,16 @@ class ParserSpec extends Specification {
         ast.down(0, 0)
 
         ast.type == MUL
-        ast[0].tok == [ID, 'a']
-        ast[1].tok == [ID, 'b']
+        ast[0].tok == [REF, 'a']
+        ast[1].tok == [REF, 'b']
 
         ast.up()
         ast.type == MUL
-        ast[1].tok == [ID, 'c']
+        ast[1].tok == [REF, 'c']
 
         ast.up()
         ast.type == MUL
-        ast[1].tok == [ID, 'd']
+        ast[1].tok == [REF, 'd']
     }
 
     def "Simple comparison"() {
@@ -113,8 +113,8 @@ class ParserSpec extends Specification {
 
       then:
         ast.type == EQ
-        ast[0].tok == [ID, 'a']
-        ast[1].tok == [ID, 'b']
+        ast[0].tok == [REF, 'a']
+        ast[1].tok == [REF, 'b']
     }
 
     def "Simple expression with if"() {
@@ -124,12 +124,12 @@ class ParserSpec extends Specification {
       then:
         ast.type == CONDITION
         ast[0].type == IF
-        ast[0][0].type == ID
+        ast[0][0].tok == [REF, 'x']
 
         ast.down(1)
-        ast.text == "+"
-        ast[0].tok == [ID, "a"]
-        ast[1].tok == [ID, "b"]
+        ast.type == ADD
+        ast[0].tok == [REF, "a"]
+        ast[1].tok == [REF, "b"]
     }
 
     def "Finally"() {
@@ -138,7 +138,7 @@ class ParserSpec extends Specification {
 
       then:
         ast[0].type == FINALLY
-        ast[1].tok == [ID, 'foo']
+        ast[1].tok == [REF, 'foo']
     }
 
     def "Finally and if"() {
@@ -148,8 +148,8 @@ class ParserSpec extends Specification {
       then:
         ast[0].type == FINALLY
         ast[1].type == IF
-        ast[1][0].tok == [ID, 'foo']
-        ast[2].tok == [ID, 'bar']
+        ast[1][0].tok == [REF, 'foo']
+        ast[2].tok == [REF, 'bar']
     }
 
     def "A number"() {
@@ -166,7 +166,7 @@ class ParserSpec extends Specification {
 
       then:
         ast[0][0].type == THROWN
-        ast[1].tok == [ID, 'x']
+        ast[1].tok == [REF, 'x']
     }
 
     def "Function @thrown without parameters()"() {
@@ -196,11 +196,11 @@ class ParserSpec extends Specification {
       then:
         ast.down(0)
         ast.type == EQUALS
-        ast[0].tok == [ID, 'foo']
+        ast[0].tok == [REF, 'foo']
 
         ast.down(1)
         ast.type == ADD
-        ast[0].tok == [ID, 'bar']
+        ast[0].tok == [REF, 'bar']
         ast[1].tok == [INT, '2']
     }
 
@@ -211,10 +211,10 @@ class ParserSpec extends Specification {
       then:
         ast.type == EACH
         ast[0].tok == [ID, 'foo']
-        ast[1].tok == [ID, 'myCollection']
+        ast[1].tok == [REF, 'myCollection']
         ast[2].type == IF
-        ast[2][0].tok == [ID, 'bar']
-        ast[3].tok == [ID, 'foobar']
+        ast[2][0].tok == [REF, 'bar']
+        ast[3].tok == [REF, 'foobar']
     }
 
     def "Function @param and @arg are the same"() {
@@ -288,8 +288,8 @@ class ParserSpec extends Specification {
         def ast = typeref('java.lang.String')
 
       then:
-        ast.tok == [DEREFERENCE, 'String']
-        ast[0].tok == [DEREFERENCE, 'lang']
+        ast.tok == [ACCESS, 'String']
+        ast[0].tok == [ACCESS, 'lang']
         ast[0][0].tok == [ID, 'java']
     }
 
@@ -303,8 +303,8 @@ class ParserSpec extends Specification {
         ast.type == ARRAY
 
         ast.down(0)
-        ast.tok == [DEREFERENCE, 'String']
-        ast[0].tok == [DEREFERENCE, 'lang']
+        ast.tok == [ACCESS, 'String']
+        ast[0].tok == [ACCESS, 'lang']
         ast[0][0].tok == [ID, 'java']
     }
 
@@ -349,9 +349,9 @@ class ParserSpec extends Specification {
 
       then:
         ast.type == ADD
-        ast[0].tok == [ID, 'foo']
+        ast[0].tok == [REF, 'foo']
         ast[1].type == NEG
-        ast[1][0].tok == [ID, 'bar']
+        ast[1][0].tok == [REF, 'bar']
     }
 
     def "Recurse unary"() {
@@ -389,7 +389,7 @@ class ParserSpec extends Specification {
         ast[1][0][0].tok == [INT, '3']
     }
 
-    def "Cast with dereference (postfix over prefix)"() {
+    def "Cast with ACCESS (postfix over prefix)"() {
       when:
         def ast = unary('(int)foo.bar')
 
@@ -398,11 +398,11 @@ class ParserSpec extends Specification {
         ast[0].tok == [TINT, 'int']
 
         ast.down(1)
-        ast.tok == [DEREFERENCE, 'bar']
-        ast[0].tok == [ID, 'foo']
+        ast.tok == [ACCESS, 'bar']
+        ast[0].tok == [REF, 'foo']
     }
 
-    def "Complex dereference/call/cast/index combination"() {
+    def "Complex ACCESS/call/cast/index combination"() {
       when:
         def ast = unary('((int)"abc".foo).bar(1+2, 3*3)[42]')
 
@@ -420,7 +420,7 @@ class ParserSpec extends Specification {
         ast[0].tok == [TINT, 'int']
 
         ast.down(1)
-        ast.tok == [DEREFERENCE, 'foo']
+        ast.tok == [ACCESS, 'foo']
         ast[0].tok == [STRING, '"abc"']
     }
 
@@ -433,7 +433,7 @@ class ParserSpec extends Specification {
         ast[0].type == CLASS
 
         ast.down(0, 0)
-        ast.tok == [DEREFERENCE, 'bar']
+        ast.tok == [ACCESS, 'bar']
         ast[0].tok == [ID, 'foo']
 
       then:
@@ -503,7 +503,7 @@ class ParserSpec extends Specification {
         ast.type != CAST
       and: "It must be an addition"
         ast.type == ADD
-        ast[0].tok == [ID, 'a']
+        ast[0].tok == [REF, 'a']
         ast[1].tok == [INT, '1']
     }
 
@@ -516,6 +516,16 @@ class ParserSpec extends Specification {
         ast[0].tok == [TINT, 'int']
         ast[1].type == POS
         ast[1][0].tok == [INT, '1']
+    }
+
+    def "A call without dereference will be represented as call to REF"() {
+      when:
+        def ast = expression('foo(42)')
+
+      then:
+        ast.tok == [CALL, 'foo']
+        ast[0].tok == [INT, '42']
+        ast[1].type == REF
     }
 
     def methodMissing(String name, args) {

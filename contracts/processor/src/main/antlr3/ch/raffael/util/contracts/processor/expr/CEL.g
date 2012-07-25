@@ -72,7 +72,7 @@ tokens {
 	INDEX_OPEN	= '[';
 	INDEX_CLOSE	= ']';
 	
-	DEREFERENCE	= '.';
+	ACCESS		= '.';
 	COLON		= ':';
 	CLOSURE		= '->';
 	
@@ -83,6 +83,7 @@ tokens {
 	CALL;
 	INDEX;
 	ARRAY;
+	REF;
 }
 
 @parser::header {
@@ -163,19 +164,26 @@ cast	:	paren=PAREN_OPEN primitiveType PAREN_CLOSE unary -> ^(CAST[$paren] primit
 	|	paren=PAREN_OPEN typeref PAREN_CLOSE unarynoPosNeg -> ^(CAST[$paren] typeref unarynoPosNeg)
 	;
 
-selector:	DEREFERENCE member=ID -> ^(DEREFERENCE[$member])
-	|	DEREFERENCE method=ID PAREN_OPEN argList? PAREN_CLOSE -> ^(CALL[$method] argList*)
+selector:	ACCESS member=ID -> ^(ACCESS[$member])
+	|	ACCESS method=ID PAREN_OPEN argList? PAREN_CLOSE -> ^(CALL[$method] argList*)
 	|	index=INDEX_OPEN expression INDEX_CLOSE -> ^(INDEX[$index] expression)
 	;
 	
 factor	:
-	(	ID|INT|FLOAT|STRING|CHAR
+	(	reference
+	|	INT|FLOAT|STRING|CHAR
 	|	TRUE|FALSE|NULL|THIS|SUPER
-	|	( typeref | primitiveType | TVOID ) DEREFERENCE! CLASS^
+	|	( typeref | primitiveType | TVOID ) ACCESS! CLASS^
 	|	call
 	|	function
 	|	(PAREN_OPEN! expression PAREN_CLOSE!));
-call	:	method=ID PAREN_OPEN argList? PAREN_CLOSE -> ^(CALL[$method] argList* THIS);
+reference
+	// A reference to unknown; this is used later to determine how to interpret this:
+	// It could be a local variable, a field, a static field, a package/class
+	// See JLS7 §6.5.2
+	:	id=ID -> ^(REF[$id])
+	;
+call	:	method=ID PAREN_OPEN argList? PAREN_CLOSE -> ^(CALL[$method] argList* REF);
 
 function:	OLD^ PAREN_OPEN! expression PAREN_CLOSE!
 	|	THROWN^ PAREN_OPEN! classref? PAREN_CLOSE!
@@ -197,7 +205,7 @@ typeref	:	classref array^*
 	;
 classref:	ID classDereference^*;
 classDereference
-	:	DEREFERENCE pkgOrCls=ID -> ^(DEREFERENCE[$pkgOrCls]);
+	:	ACCESS pkgOrCls=ID -> ^(ACCESS[$pkgOrCls]);
 typerefFragment
 	:	ID
 	;
