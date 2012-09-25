@@ -11,19 +11,20 @@ import ch.raffael.util.contracts.NotNull;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public final class ContractsPolicy {
+public final class ContractsContext {
 
     public static final String ROOT_NAME = "*";
 
-    private static final ContractsPolicy ROOT = new ContractsPolicy("");
+    private static final ContractsContext ROOT = new ContractsContext("");
+    private static final Log LOG = Log.getInstance();
 
-    private static final Map<String, ContractsPolicy> POLICIES = new HashMap<String, ContractsPolicy>();
+    private static final Map<String, ContractsContext> CONTEXTS = new HashMap<String, ContractsContext>();
 
     private final String name;
-    private final LinkedList<ContractsPolicy> children = new LinkedList<ContractsPolicy>();
+    private final LinkedList<ContractsContext> children = new LinkedList<ContractsContext>();
     private volatile boolean enabled;
 
-    private ContractsPolicy(@NotNull String name) {
+    private ContractsContext(@NotNull String name) {
         this.name = name;
     }
 
@@ -33,15 +34,15 @@ public final class ContractsPolicy {
     }
 
     @NotNull
-    public static ContractsPolicy getPolicy(@NotNull String name) {
-        ContractsPolicy policy;
+    public static ContractsContext getContext(@NotNull String name) {
+        ContractsContext context;
         if ( name.equals(ROOT_NAME) ) {
             return ROOT;
         }
-        synchronized ( POLICIES ) {
-            policy = POLICIES.get(name);
-            if ( policy != null ) {
-                return policy;
+        synchronized ( CONTEXTS ) {
+            context = CONTEXTS.get(name);
+            if ( context != null ) {
+                return context;
             }
             if ( !ROOT_NAME.equals(name) ) {
                 boolean firstChar = true;
@@ -66,74 +67,76 @@ public final class ContractsPolicy {
                     throw new IllegalArgumentException("Illegal policy name: '" + name + "'");
                 }
             }
-            return getPolicy0(name);
+            return getContext0(name);
         }
     }
 
     @NotNull
-    private static ContractsPolicy getPolicy0(@NotNull String name) {
-        ContractsPolicy policy;
-        policy = POLICIES.get(name);
-        if ( policy == null ) {
-            policy = new ContractsPolicy(name);
-            ContractsPolicy parent;
+    private static ContractsContext getContext0(@NotNull String name) {
+        ContractsContext context;
+        context = CONTEXTS.get(name);
+        if ( context == null ) {
+            context = new ContractsContext(name);
+            ContractsContext parent;
             int pos = name.lastIndexOf('.');
             if ( pos < 0 ) {
                 parent = ROOT;
             }
             else {
-                parent = getPolicy0(name.substring(0, pos));
+                parent = getContext0(name.substring(0, pos));
             }
-            parent.children.add(policy);
-            POLICIES.put(name, policy);
+            parent.children.add(context);
+            CONTEXTS.put(name, context);
         }
-        return policy;
+        return context;
     }
 
     @NotNull
-    public static ContractsPolicy getPolicy(@NotNull Class<?> clazz) {
+    public static ContractsContext getContext(@NotNull Class<?> clazz) {
         Class<?> outer = clazz;
         while ( outer.getEnclosingClass() != null ) {
             outer = outer.getEnclosingClass();
         }
-        synchronized ( POLICIES ) {
-            return getPolicy0(outer.getName());
+        synchronized ( CONTEXTS ) {
+            return getContext0(outer.getName());
         }
     }
 
     @NotNull
-    public static ContractsPolicy getPolicy(@NotNull Package pkg) {
-        synchronized ( POLICIES ) {
-            return getPolicy0(pkg.getName());
+    public static ContractsContext getContext(@NotNull Package pkg) {
+        synchronized ( CONTEXTS ) {
+            return getContext0(pkg.getName());
         }
     }
 
-    public boolean enabled() {
+    public boolean isEnabled() {
         return enabled;
     }
 
     public void enable() {
-        synchronized ( POLICIES ) {
+        synchronized ( CONTEXTS ) {
+            LOG.info("Enabling contracts for %s", name);
             enable0();
         }
     }
 
     private void enable0() {
         enabled = true;
-        for ( ContractsPolicy child : children ) {
+        for ( ContractsContext child : children ) {
             child.enable0();
         }
     }
 
     public void disable() {
-        synchronized ( POLICIES ) {
+        synchronized ( CONTEXTS ) {
+            LOG.info("Disabling contracts for %s", name);
             disable0();
         }
     }
 
     private void disable0() {
         enabled = false;
-        for ( ContractsPolicy child : children ) {
+        for ( ContractsContext child : children ) {
             child.disable0();
         }
     }

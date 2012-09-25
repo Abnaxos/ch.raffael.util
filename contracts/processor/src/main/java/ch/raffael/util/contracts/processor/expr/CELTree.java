@@ -11,6 +11,7 @@ import org.antlr.runtime.tree.Tree;
 public class CELTree extends CommonTree {
 
     private Class<?> javaType;
+    private Object data;
 
     public CELTree() {
         super();
@@ -30,6 +31,14 @@ public class CELTree extends CommonTree {
 
     public void setJavaType(Class<?> javaType) {
         this.javaType = javaType;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
     }
 
     @Override

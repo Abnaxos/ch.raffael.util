@@ -32,6 +32,23 @@
   </modules>
 
   <dependencies>
+    <dependency>
+      <artifactId>org.slf4j</artifactId>
+      <groupId>slf4j-api</groupId>
+      <version>${slf4j.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.javassist</groupId>
+        <artifactId>javassist</artifactId>
+        <version>3.16.1-GA</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
 </project>

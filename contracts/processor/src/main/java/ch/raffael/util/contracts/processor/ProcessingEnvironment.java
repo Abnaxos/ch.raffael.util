@@ -4,8 +4,11 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 import javassist.ClassPool;
+import javassist.CtClass;
 import javassist.NotFoundException;
 
+import ch.raffael.util.contracts.NotNull;
+import ch.raffael.util.contracts.Nullable;
 import ch.raffael.util.contracts.processor.model.ClassInfo;
 
 
@@ -27,6 +30,21 @@ public class ProcessingEnvironment {
         //if ( info == null ) {
         //    classInfos.put(new Scanner(this, classPool.get(className)).collectClassInfo());
         //}
+    }
+
+    @NotNull
+    public ClassPool getClassPool() {
+        return classPool;
+    }
+
+    @Nullable
+    public CtClass findClass(@NotNull String name) {
+        try {
+            return classPool.get(name);
+        }
+        catch ( NotFoundException e ) {
+            return null;
+        }
     }
 
     public Log getLog() {

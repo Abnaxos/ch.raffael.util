@@ -8,13 +8,17 @@ import ch.raffael.util.contracts.NotNull;
  */
 public class TestClass {
 
-    protected String var = "VAR";
+    private String var = "VAR";
     private static Object $1;
     private static Object test;
 
     @NotNull
     public synchronized Object notNull(Object obj) {
-        System.out.println(obj);
+        System.out.println(new Runnable() {
+            @Override
+            public void run() {
+            }
+        });
         return obj;
     }
 
@@ -22,13 +26,22 @@ public class TestClass {
         return null;
     }
 
-    public class Inner {
+    public static class Inner {
+        private int x;
         @NotNull
         public Object method(int obj) {
             return obj;
         }
-        public class Inner2 {
+        public static class Inner2 {
+            Class foo = Inner.class;
+        }
+    }
 
+    public static void test() {
+        class Local {
+            void Method(TestClass x, Inner foo) {
+                System.out.println(x.var+foo.x);
+            }
         }
     }
 

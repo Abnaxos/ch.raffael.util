@@ -257,7 +257,7 @@ class ParserSpec extends Specification {
 
     def "@param() with +/- requires an int"() {
       when:
-        def ast = paramFunction(expr)
+        paramFunction(expr)
 
       then:
         thrown ParseException
@@ -448,10 +448,11 @@ class ParserSpec extends Specification {
         ast.type == type
 
       where:
-        expr      | type
-        '(a)+(b)' | ADD
-        '(int)+b' | CAST
-        '(a)(+b)' | CAST
+        expr        | type
+        '(a)+(b)'   | ADD
+        '(a)+b'     | ADD
+        '(int)+b'   | CAST
+        '(a)(+b)'   | CAST
         '(int)(+b)' | CAST
     }
 
@@ -495,8 +496,8 @@ class ParserSpec extends Specification {
         // Final decision: See Spec above "Differentiate between ADD/SUB": Opted for the
         // last option
         // Note that actually, javac doesn't support an expression like
-        // (Integer)+42 neither ...
-        when:
+        // (Integer)+42 neither. It's even specified that way: JLS7, §15.15
+      when:
         def ast = expression('(a)+1')
 
       then: "This is not a cast"

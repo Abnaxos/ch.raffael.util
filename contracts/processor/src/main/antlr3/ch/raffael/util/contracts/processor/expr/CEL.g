@@ -9,7 +9,6 @@ options {
 
 tokens {
 	IF		= 'if';
-	FOR		= 'for';
 	FINALLY 	= 'finally';
 	TRUE		= 'true';
 	FALSE		= 'false';
@@ -73,8 +72,9 @@ tokens {
 	INDEX_CLOSE	= ']';
 	
 	ACCESS		= '.';
+	COMMA		= ',';
 	COLON		= ':';
-	CLOSURE		= '->';
+	LAMBDA		= '->';
 	
 	CONDITION;
 	POS;
@@ -114,7 +114,7 @@ ifExpression
 	;
 
 expression
-	:	logicalOr ( CONDITIONAL^ expression ':'! expression )?
+	:	logicalOr ( CONDITIONAL^ expression COLON! expression )?
 	;
 
 logicalOr
@@ -153,15 +153,16 @@ multiplication
 	
 unary	:	add=ADD unary -> ^(POS[$add] unary)
 	|	sub=SUB unary -> ^(NEG[$sub] unary)
-	|	unarynoPosNeg
+	|	unaryNoPosNeg
 	;
-unarynoPosNeg	:	BITWISE_NOT^ unary
+unaryNoPosNeg
+	:	BITWISE_NOT^ unary
 	|	LOGICAL_NOT^ unary
 	|	cast
 	|	factor selector^*
 	;
 cast	:	paren=PAREN_OPEN primitiveType PAREN_CLOSE unary -> ^(CAST[$paren] primitiveType unary)
-	|	paren=PAREN_OPEN typeref PAREN_CLOSE unarynoPosNeg -> ^(CAST[$paren] typeref unarynoPosNeg)
+	|	paren=PAREN_OPEN typeref PAREN_CLOSE unaryNoPosNeg -> ^(CAST[$paren] typeref unaryNoPosNeg)
 	;
 
 selector:	ACCESS member=ID -> ^(ACCESS[$member])
@@ -176,28 +177,29 @@ factor	:
 	|	( typeref | primitiveType | TVOID ) ACCESS! CLASS^
 	|	call
 	|	function
-	|	(PAREN_OPEN! expression PAREN_CLOSE!));
+	|	(PAREN_OPEN! expression PAREN_CLOSE!)
+	);
 reference
 	// A reference to unknown; this is used later to determine how to interpret this:
 	// It could be a local variable, a field, a static field, a package/class
 	// See JLS7 §6.5.2
 	:	id=ID -> ^(REF[$id])
 	;
-call	:	method=ID PAREN_OPEN argList? PAREN_CLOSE -> ^(CALL[$method] argList* REF);
+call	:	method=ID PAREN_OPEN argList? PAREN_CLOSE -> ^(CALL[$method] argList? REF);
 
 function:	OLD^ PAREN_OPEN! expression PAREN_CLOSE!
 	|	THROWN^ PAREN_OPEN! classref? PAREN_CLOSE!
 	|	paramFunction
 	|	RESULT^ PAREN_OPEN! PAREN_CLOSE!
-	|	EQUALS^ PAREN_OPEN! expression ','! expression PAREN_CLOSE!
-	|	EACH^ PAREN_OPEN! ID COLON! expression CLOSURE! fullExpression PAREN_CLOSE!
+	|	EQUALS^ PAREN_OPEN! expression COMMA! expression PAREN_CLOSE!
+	|	EACH^ PAREN_OPEN! ID COLON! expression LAMBDA! fullExpression PAREN_CLOSE!
 	;
 paramFunction
 	:	(fun=PARAM|fun=ARG) PAREN_OPEN (((ADD|SUB)? INT) | ID)? PAREN_CLOSE
 	-> ^(PARAM[$fun] ADD? SUB? INT? ID?)
 	;
 		
-argList	:	expression ( ','! expression )*
+argList	:	expression ( COMMA! expression )*
 	;
 
 typeref	:	classref array^*
@@ -214,9 +216,7 @@ primitiveType
 	:	TINT | TLONG | TSHORT | TBYTE | TDOUBLE | TFLOAT | TCHAR | TBOOLEAN
 	;
 
-ID	:	IDENT;
-fragment IDENT  :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
-    ;
+ID	:	('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'$')*;
 
 INT	:
 	( '0'
@@ -224,7 +224,7 @@ INT	:
 	| '0' OCT_DIGIT+
 	| '0' 'x' HEX_DIGIT+
 	) ('l'|'L')?
-    ;
+	;
 
 FLOAT
     :
