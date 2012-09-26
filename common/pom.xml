@@ -35,7 +35,7 @@
   <parent>
     <groupId>ch.raffael.util</groupId>
     <artifactId>cru-parent</artifactId>
-    <version>3</version>
+    <version>11.09.25</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 

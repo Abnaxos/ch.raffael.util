@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>ch.raffael.util</groupId>
-  <artifactId>cru-cli</artifactId>
+  <artifactId>cru-classloader</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
 
