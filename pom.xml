@@ -204,6 +204,13 @@
         </dependencies>
       </plugin>
     </plugins>
+    <extensions>
+      <extension>
+        <artifactId>wagon-webdav-jackrabbit</artifactId>
+        <groupId>org.apache.maven.wagon</groupId>
+        <version>2.2</version>
+      </extension>
+    </extensions>
   </build>
 
   <repositories>
@@ -217,7 +224,7 @@
   <distributionManagement>
     <repository>
       <id>deploy.maven.raffael.ch</id>
-      <url>http://maven.raffael.ch/</url>
+      <url>dav:http://maven.raffael.ch/</url>
     </repository>
   </distributionManagement>
 
