@@ -3,6 +3,8 @@ package ch.raffael.util.classloader;
 
 import spock.lang.Specification
 
+import static ch.raffael.util.classloader.IsolatingClassLoader.*
+
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
@@ -10,11 +12,11 @@ import spock.lang.Specification
 class IsolatingClassLoaderSpec extends Specification {
 
     private RecordingClassLoader recording = new RecordingClassLoader()
-    private IsolatingClassLoader isolating = new IsolatingClassLoader(recording)
+    private IsolatingClassLoader isolating
 
     def "Isolates class loading"() {
       given:
-        isolating.exclude("foo")
+        isolating = builder().exclude("foo").build(recording)
 
       when:
         tryLoad("bar.Foo")
@@ -27,8 +29,7 @@ class IsolatingClassLoaderSpec extends Specification {
 
     def "Deepest matching isolation is used"() {
       given:
-        isolating.exclude("foo/")
-        isolating.include("foo/bar")
+        isolating = builder().exclude("foo/").include("foo/bar").build(recording)
 
       when:
         tryLoad("foo.Bar")
@@ -41,7 +42,7 @@ class IsolatingClassLoaderSpec extends Specification {
 
     def "Also works for getResource()"() {
       given:
-        isolating.exclude("foo/")
+        isolating = builder().exclude("foo/").build(recording)
 
       when:
         isolating.getResource("foo/bar/foobar")
@@ -54,7 +55,7 @@ class IsolatingClassLoaderSpec extends Specification {
 
     def "Also works for getResources()"() {
       given:
-        isolating.exclude("foo/")
+        isolating = builder().exclude("foo/").build(recording)
 
       when:
         isolating.getResources("foo/bar/foobar")
@@ -63,6 +64,19 @@ class IsolatingClassLoaderSpec extends Specification {
       then:
         !("r:foo/bar/foobar" in recording)
         "r:bar/foo" in recording
+    }
+
+    def "excludeByDefault turns things the other way round"() {
+      given:
+        isolating = builder().include("foo/").excludeByDefault().build(recording)
+
+      when:
+        tryLoad("foo.Bar")
+        tryLoad("bar.Foo")
+
+      then:
+        "c:foo.Bar" in recording
+        !("c:bar.Foo" in recording)
     }
 
     @SuppressWarnings("GroovyUnusedCatchParameter")

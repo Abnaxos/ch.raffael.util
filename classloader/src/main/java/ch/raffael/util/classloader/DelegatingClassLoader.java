@@ -60,7 +60,6 @@ import static ch.raffael.util.classloader.Dispatcher.Type.*;
  */
 public class DelegatingClassLoader extends URLClassLoader implements DelegatingClassLoaderMBean {
 
-    private static final URL[] EMPTY_URL_ARRAY = new URL[0];
     private static final Logger log = LoggerFactory.getLogger(DelegatingClassLoader.class);
 
     private final String id = null;
