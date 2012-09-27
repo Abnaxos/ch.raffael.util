@@ -86,10 +86,17 @@ class ReflectionHandlerSpec extends Specification {
     }
 
     def "Exception when required argument is missing"() {
-      given:
-        cmd "cmd", arg(String, "str").required(), arg(int, "int")
+        //given:
+        //  cmd "cmd", arg(String, "str").required(), arg(int, "int")
+        //
+        // STRANGE BUG!
+        // The above causes a VerifyError (Stack size too large) in combination with
+        // thrown() in the then-clause starting with groovy 1.8.6 or newer (1.8.5 works
+        // fine).
+        // Moving this line to the when-clause fixes this.
 
       when:
+        cmd "cmd", arg(String, "str").required(), arg(int, "int")
         parse "cmd int:42"
 
       then:
@@ -136,10 +143,17 @@ class ReflectionHandlerSpec extends Specification {
     }
 
     def "Syntax exception on type mismatch"() {
-      given:
-        cmd "cmd", arg(int, "int")
+        //given:
+        //  cmd "cmd", arg(int, "int")
+        //
+        // STRANGE BUG!
+        // The above causes a VerifyError (Stack size too large) in combination with
+        // thrown() in the then-clause starting with groovy 1.8.6 or newer (1.8.5 works
+        // fine).
+        // Moving this line to the when-clause fixes this.
 
       when:
+        cmd "cmd", arg(int, "int")
         parse "cmd noint"
 
       then:
@@ -192,10 +206,17 @@ class ReflectionHandlerSpec extends Specification {
     }
 
     def "Syntax exception when too many values"() {
-      given:
-        cmd "cmd", arg(String, "single")
+        //given:
+        //  cmd "cmd", arg(String, "single")
+        //
+        // STRANGE BUG!
+        // The above causes a VerifyError (Stack size too large) in combination with
+        // thrown() in the then-clause starting with groovy 1.8.6 or newer (1.8.5 works
+        // fine).
+        // Moving this line to the when-clause fixes this.
 
       when:
+        cmd "cmd", arg(String, "single")
         parse "cmd two values"
 
       then:
@@ -251,10 +272,17 @@ class ReflectionHandlerSpec extends Specification {
     }
 
     def "Lists cause syntax exception if applied to single-value arguments"() {
-      given:
-        cmd "cmd", arg(String, "single")
+        //given:
+        //  cmd "cmd", arg(String, "single")
+        //
+        // STRANGE BUG!
+        // The above causes a VerifyError (Stack size too large) in combination with
+        // thrown() in the then-clause starting with groovy 1.8.6 or newer (1.8.5 works
+        // fine).
+        // Moving this line to the when-clause fixes this.
 
       when:
+        cmd "cmd", arg(String, "single")
         parse "cmd foo, bar"
 
       then:

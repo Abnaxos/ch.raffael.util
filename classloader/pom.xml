@@ -17,20 +17,11 @@
   <parent>
     <groupId>ch.raffael.util</groupId>
     <artifactId>cru-parent</artifactId>
-    <version>11.09.25</version>
+    <version>11.09.27</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
   <dependencies>
-    <dependency>
-      <groupId>ch.raffael.util</groupId>
-      <artifactId>cru-common</artifactId>
-      <version>1.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
   </dependencies>
 
 </project>
