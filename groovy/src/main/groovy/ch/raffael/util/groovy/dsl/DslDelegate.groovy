@@ -4,6 +4,9 @@ import static ch.raffael.util.groovy.dsl.DslInvoke.getDelegateProperty
 import static ch.raffael.util.groovy.dsl.DslInvoke.invokeDelegateMethod
 
 /**
+ * Internal wrapper for DSL delegates. It inspects the delegate for methods annotated with
+ * @DSL.
+ *
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
 class DslDelegate {

@@ -5,6 +5,8 @@ import ch.raffael.util.groovy.Groovy
 import java.lang.reflect.Method
 
 /**
+ * Internal utilities for invoking DSL methods.
+ *
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
 final class DslInvoke {
