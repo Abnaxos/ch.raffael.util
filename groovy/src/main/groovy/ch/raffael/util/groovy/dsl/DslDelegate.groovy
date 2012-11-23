@@ -1,8 +1,5 @@
 package ch.raffael.util.groovy.dsl
 
-import static ch.raffael.util.groovy.dsl.DslInvoke.getDelegateProperty
-import static ch.raffael.util.groovy.dsl.DslInvoke.invokeDelegateMethod
-
 /**
  * Internal wrapper for DSL delegates. It inspects the delegate for methods annotated with
  * @DSL.
@@ -12,19 +9,19 @@ import static ch.raffael.util.groovy.dsl.DslInvoke.invokeDelegateMethod
 class DslDelegate {
 
     private final DslContext context
-    private final delegate
+    final List delegates
     private boolean forceInvoke
 
     DslDelegate(DslContext context, delegate, boolean forceInvoke = false) {
         this.@context = context
-        this.@delegate = delegate
+        this.@delegates = delegate instanceof Collection ? delegate as List : [ delegate ]
         this.@forceInvoke = forceInvoke
     }
 
     @Override
     def getProperty(String name) {
         if ( this.@forceInvoke || this.@context.delegateStack && this.@context.delegateStack[-1] == this ) {
-            return getDelegateProperty(this.@context, this.@delegate, name)
+            return this.@context.getDelegateProperty(this, name)
         }
         else {
             throw new MissingPropertyException(name, this.@context.delegateStack[-1].getClass())
@@ -41,7 +38,7 @@ class DslDelegate {
     @Override
     def invokeMethod(String name, args) {
         if ( this.@forceInvoke || this.@context.delegateStack && this.@context.delegateStack[-1] == this ) {
-            return invokeDelegateMethod(this.@context, this.@delegate, name, args as Object[])
+            return this.@context.invokeDelegateMethod(this, name, args as Object[])
         }
         else {
             throw new MissingMethodException(name, this.@context.delegateStack[-1].getClass(), args)

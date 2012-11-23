@@ -2,9 +2,6 @@ package ch.raffael.util.groovy.dsl
 
 import ch.raffael.util.groovy.Groovy
 
-import static ch.raffael.util.groovy.dsl.DslInvoke.getDelegateProperty
-import static ch.raffael.util.groovy.dsl.DslInvoke.invokeDelegateMethod
-
 /**
  * Main entry point for the DSL framework.
  *
@@ -26,13 +23,14 @@ class DslScript {
             script.setBinding(binding)
         }
         DslContext context = new DslContext()
-        context.delegateStack.push(new DslDelegate(context, rootDelegate))
+        def rootDslDelegate = new DslDelegate(context, rootDelegate)
+        context.delegateStack.push(rootDslDelegate)
         script.metaClass = Groovy.makeExpando(script) { emc ->
             emc.methodMissing = { String name, args ->
-                invokeDelegateMethod(context, context.delegateStack[-1].@delegate, name, args as Object[])
+                context.invokeDelegateMethod(rootDslDelegate, name, args as Object[])
             }
             emc.propertyMissing = { String name ->
-                getDelegateProperty(context, context.delegateStack[-1].@delegate, name)
+                context.getDelegateProperty(rootDslDelegate, name)
             }
         }
         if ( binding != null ) {

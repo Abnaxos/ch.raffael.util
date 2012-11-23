@@ -13,7 +13,7 @@ class DslSpec extends Specification {
 
     def "DSL invokes methods annotated with @DSL, evals closures when with @WithBody"() {
       when:
-        def root = eval('hello { greet \'DSL\' }')
+        def root = run('hello { greet \'DSL\' }')
 
       then:
         root.result == 'Hello DSL'
@@ -21,16 +21,38 @@ class DslSpec extends Specification {
 
     def "Methods not annotated with @DSL won't be available"() {
       when:
-        def root = eval("hello { noDsl() }")
+        def root = run("hello { noDsl() }")
 
       then:
         def e = thrown(MissingMethodException)
         e.method == 'noDsl'
     }
 
+    def "Methods won't be available in nested closures"() {
+      when:
+        def root = run("hello { hello2 { throw Exception('Will not happen') } }")
+
+      then:
+        def e = thrown(MissingMethodException)
+        e.method == 'hello2'
+    }
+
+    def "Methods of DSL delegates annotated with @Inherited WILL be available in nested closures"() {
+      when:
+        DslScript.run({
+            hello {
+                inheritThis("Foo")
+            }
+        }, [ new DslRoot(), new Inherit() ])
+
+      then:
+        def e = thrown(IllegalStateException)
+        e.message == "Inherited: Foo"
+    }
+
     def "If no annotated method can be found, look for @Dynamic and try that one"() {
       when:
-        def root = eval('hello { any "foo", 42 }')
+        def root = run('hello { any "foo", 42 }')
 
       then:
         root.result == [ "foo", 42 ] as Object[]
@@ -39,7 +61,7 @@ class DslSpec extends Specification {
 
     def "Methods with no arguments may be referred to as property"() {
       when:
-        def root = eval('hello { noargs }')
+        def root = run('hello { noargs }')
 
       then:
         root.result == 'no args'
@@ -47,7 +69,7 @@ class DslSpec extends Specification {
 
     def "If the delegate is a collection, the elements will be tried in order"() {
       when:
-        def root = eval("hello2 { $method \"$arg\" }")
+        def root = run("hello2 { $method \"$arg\" }")
 
       then:
         root.result == result
@@ -60,7 +82,7 @@ class DslSpec extends Specification {
 
     def "It's also possible to just call a method with no closure"() {
       when:
-        def root = eval("hello.greet 'Shortcut'")
+        def root = run("hello.greet 'Shortcut'")
 
       then:
         root.result == 'Hello Shortcut'
@@ -68,7 +90,7 @@ class DslSpec extends Specification {
 
     def "Call closure using invoker if specified in @WithBody"() {
       when:
-        def root = eval("withInvoker { name -> greet name }")
+        def root = run("withInvoker { name -> greet name }")
 
       then:
         root.result == 'Hello Invoker'
@@ -76,7 +98,7 @@ class DslSpec extends Specification {
 
     def "Specifying a closure on a method without @WithBody won't work"() {
       when:
-        eval("hello { greet('Foo') { println 'Error' } }")
+        run("hello { greet('Foo') { println 'Error' } }")
 
       then:
         def e = thrown(MissingMethodException)
@@ -85,7 +107,7 @@ class DslSpec extends Specification {
 
     def "If there is a method with a closure parameter, it will be called, no action taken with closure"() {
       when:
-        def root = eval("hello { closure { return 'This is my closure' } }")
+        def root = run("hello { closure { return 'This is my closure' } }")
 
       then:
         root.result() == 'This is my closure'
@@ -93,7 +115,7 @@ class DslSpec extends Specification {
 
     def "You can also eval closures"() {
       when:
-        DslScript.eval({
+        DslScript.run({
             hello {
                 greet 'Foo'
             }
@@ -108,9 +130,9 @@ class DslSpec extends Specification {
         true
     }
 
-    private <T> T eval(String script) {
+    private DslRoot run(String script) {
         def root = new DslRoot()
-        DslScript.eval(shell.parse(script), root)
+        DslScript.run(shell.parse(script), root)
         return root
     }
 
