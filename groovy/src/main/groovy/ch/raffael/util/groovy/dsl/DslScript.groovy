@@ -18,25 +18,28 @@ class DslScript {
      *
      * @return The return value of the script.
      */
-    static eval(Script script, Binding binding = null, rootDelegate) {
+    static eval(Script script, rootDelegate, Binding binding = null, Closure expandoSetup = null) {
         if ( binding != null ) {
             script.setBinding(binding)
         }
         DslContext context = new DslContext()
-        def rootDslDelegate = new DslDelegate(context, rootDelegate)
-        context.delegateStack.push(rootDslDelegate)
-        script.metaClass = Groovy.makeExpando(script) { emc ->
-            emc.methodMissing = { String name, args ->
-                context.invokeDelegateMethod(rootDslDelegate, name, args as Object[])
+        context.withDelegate(null, rootDelegate) { DslDelegate dsld ->
+            script.metaClass = Groovy.makeExpando(script) { emc ->
+                emc.methodMissing = { String name, args ->
+                    context.invokeDelegateMethod(dsld, name, args as Object[])
+                }
+                emc.propertyMissing = { String name ->
+                    context.getDelegateProperty(dsld, name)
+                }
+                if ( expandoSetup != null ) {
+                    Groovy.prepare(expandoSetup, null).call(emc)
+                }
             }
-            emc.propertyMissing = { String name ->
-                context.getDelegateProperty(rootDslDelegate, name)
+            if ( binding != null ) {
+                script.setBinding(binding)
             }
+            script.run()
         }
-        if ( binding != null ) {
-            script.setBinding(binding)
-        }
-        return script.run()
     }
 
     /**
@@ -49,14 +52,8 @@ class DslScript {
      * @return The return value of the closure.
      */
     static eval(Closure closure, rootDelegate, Object... args) {
-        def ctx = new DslContext()
-        def dslDelegate = new DslDelegate(ctx, rootDelegate)
-        ctx.delegateStack.push(dslDelegate)
-        try {
-            return Groovy.prepare(closure, dslDelegate, Closure.DELEGATE_FIRST).call(args)
-        }
-        finally {
-            ctx.delegateStack.pop()
+        new DslContext().withDelegate(null, rootDelegate) { DslDelegate dsld ->
+            Groovy.prepare(closure, dsld, Closure.DELEGATE_FIRST).call(args)
         }
     }
 
@@ -69,8 +66,8 @@ class DslScript {
      *
      * @return The root delegate.
      */
-    static <T> T run(Script script, Binding binding = null, T rootDelegate) {
-        eval(script, binding, rootDelegate)
+    static <T> T run(Script script, T rootDelegate, Binding binding = null, Closure expandoSetup = null) {
+        eval(script, rootDelegate, binding, expandoSetup)
         return rootDelegate
     }
 
@@ -84,7 +81,7 @@ class DslScript {
      * @return The root delegate.
      */
     static <T> T run(Closure closure, T rootDelegate, Object... args) {
-        eval(closure, rootDelegate)
+        eval(closure, rootDelegate, args)
         return rootDelegate
     }
 

@@ -13,24 +13,32 @@ class DslContext {
 
     private final static Object[] EMPTY_ARGS = new Object[0]
 
-    final List<DslDelegate> delegateStack = []
-
-    private Map<String, Object> properties = [:]
+    DslDelegate currentDelegate = null
 
     DslContext() {
     }
 
+    def withDelegate(DslDelegate parent, delegate, Closure closure) {
+        DslDelegate wrapper = new DslDelegate(parent, this, delegate)
+        DslDelegate prev = currentDelegate
+        currentDelegate = wrapper
+        try {
+            Groovy.prepare(closure, null).call(wrapper)
+        }
+        finally {
+            currentDelegate = prev
+        }
+    }
+
     def getDelegateProperty(DslDelegate dslDelegate, String name) {
-        assert !delegateStack.empty
-        doInvokeDelegateMethod(dslDelegate, false, name, EMPTY_ARGS)
+        doInvokeDelegateMethod(dslDelegate, dslDelegate, name, EMPTY_ARGS)
     }
 
     def invokeDelegateMethod(DslDelegate dslDelegate, String name, Object[] args) {
-        assert !delegateStack.empty
-        doInvokeDelegateMethod(dslDelegate, false, name, args)
+        doInvokeDelegateMethod(dslDelegate, dslDelegate, name, args)
     }
 
-    private doInvokeDelegateMethod(DslDelegate dslDelegate, boolean inheritedOnly, String name, Object[] args) {
+    private doInvokeDelegateMethod(DslDelegate dslDelegate, DslDelegate topInvoker, String name, Object[] args) {
         MissingMethodException missingMethod = null
         for ( delegate in dslDelegate.@delegates ) {
             Closure closure = null
@@ -38,7 +46,7 @@ class DslContext {
             MetaMethod method
             WithBody withBody
             try {
-                if ( inheritedOnly && delegate.class.getAnnotation(Inherited) == null ) {
+                if ( !dslDelegate.is(currentDelegate) && delegate.class.getAnnotation(Inherited) == null ) {
                     throw new MissingMethodException(name, delegate.getClass(), args)
                 }
                 method = pickMethod(delegate, name, callArgs)
@@ -67,10 +75,8 @@ class DslContext {
             def retval = method.doMethodInvoke(delegate, callArgs)
             if ( withBody ) {
                 if ( closure != null ) {
-                    def del = new DslDelegate(this, retval)
-                    closure = Groovy.prepare(closure, del, Closure.DELEGATE_FIRST)
-                    delegateStack.push(del)
-                    try {
+                    withDelegate(topInvoker, retval) { DslDelegate dsld ->
+                        closure = Groovy.prepare(closure, dsld, Closure.DELEGATE_FIRST)
                         if ( withBody.invoker() ) {
                             retval = delegate."${withBody.invoker()}"(closure)
                         }
@@ -78,30 +84,21 @@ class DslContext {
                             retval = closure.call()
                         }
                     }
-                    finally {
-                        delegateStack.pop()
-                    }
                 }
             }
             return retval
         }
         assert missingMethod != null
         // try the delegate stack upwards
-        int me = -1
-        try {
-            for ( d in delegateStack ) {
-                me++
-                if ( d.is(dslDelegate) ) {
-                    if ( me == 0 ) {
-                        throw missingMethod
-                    }
-                    else {
-                        return doInvokeDelegateMethod(delegateStack[me-1], true, name, args)
-                    }
-                }
+        if ( dslDelegate.@parent != null ) {
+            try {
+                doInvokeDelegateMethod(dslDelegate.@parent, topInvoker, name, args)
+            }
+            catch ( MissingMethodException e ) {
+                throw missingMethod
             }
         }
-        catch ( MissingMethodException e ) {
+        else {
             throw missingMethod
         }
     }
