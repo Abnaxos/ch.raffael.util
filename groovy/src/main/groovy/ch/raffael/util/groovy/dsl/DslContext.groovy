@@ -18,8 +18,20 @@ class DslContext {
     DslContext() {
     }
 
-    def withDelegate(DslDelegate parent, delegate, Closure closure) {
-        DslDelegate wrapper = new DslDelegate(parent, this, delegate)
+    @Override
+    String toString() {
+        'DslContext{' + currentDelegate + '}'
+    }
+
+    def withDelegate(delegate, Closure closure) {
+        doWithDelegate(new DslDelegate(this, delegate), closure)
+    }
+
+    private doWithDelegate(DslDelegate parent, String method, delegate, Closure closure) {
+        doWithDelegate(new DslDelegate(parent, method, this, delegate), closure)
+    }
+
+    private doWithDelegate(DslDelegate wrapper, Closure closure) {
         DslDelegate prev = currentDelegate
         currentDelegate = wrapper
         try {
@@ -75,7 +87,7 @@ class DslContext {
             def retval = method.doMethodInvoke(delegate, callArgs)
             if ( withBody ) {
                 if ( closure != null ) {
-                    withDelegate(topInvoker, retval) { DslDelegate dsld ->
+                    doWithDelegate(topInvoker, name, retval) { DslDelegate dsld ->
                         closure = Groovy.prepare(closure, dsld, Closure.DELEGATE_FIRST)
                         if ( withBody.invoker() ) {
                             retval = delegate."${withBody.invoker()}"(closure)
@@ -94,7 +106,7 @@ class DslContext {
             try {
                 doInvokeDelegateMethod(dslDelegate.@parent, topInvoker, name, args)
             }
-            catch ( MissingMethodException e ) {
+            catch ( MissingMethodException ignored ) {
                 throw missingMethod
             }
         }
@@ -111,7 +123,7 @@ class DslContext {
         try {
             return javaClass.getMethod(metaMethod.name, metaMethod.nativeParameterTypes)
         }
-        catch ( NoSuchMethodException e ) {
+        catch ( NoSuchMethodException ignored ) {
             return null
         }
     }
@@ -123,7 +135,7 @@ class DslContext {
                 try {
                     return method.doMethodInvoke(delegate, [name, args] as Object[])
                 }
-                catch ( MissingMethodException e ) {
+                catch ( MissingMethodException ignored ) {
                     // ignore
                 }
             }

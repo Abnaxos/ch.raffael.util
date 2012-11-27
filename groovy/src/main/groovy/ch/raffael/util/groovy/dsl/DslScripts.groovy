@@ -7,7 +7,10 @@ import ch.raffael.util.groovy.Groovy
  *
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-class DslScript {
+final class DslScripts {
+
+    private DslScripts() {
+    }
 
     /**
      * Evaluate a DSL script using the given root delegate.
@@ -23,7 +26,8 @@ class DslScript {
             script.setBinding(binding)
         }
         DslContext context = new DslContext()
-        context.withDelegate(null, rootDelegate) { DslDelegate dsld ->
+        context.withDelegate(rootDelegate) { DslDelegate dsld ->
+            //noinspection GroovyMissingReturnStatement
             script.metaClass = Groovy.makeExpando(script) { emc ->
                 def invokeDslMethod = { String name, args ->
                     context.invokeDelegateMethod(dsld, name, args as Object[])
@@ -56,7 +60,7 @@ class DslScript {
      * @return The return value of the closure.
      */
     static eval(Closure closure, rootDelegate, Object... args) {
-        new DslContext().withDelegate(null, rootDelegate) { DslDelegate dsld ->
+        new DslContext().withDelegate(rootDelegate) { DslDelegate dsld ->
             Groovy.prepare(closure, dsld, Closure.DELEGATE_FIRST).call(args)
         }
     }

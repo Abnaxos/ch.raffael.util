@@ -39,7 +39,7 @@ class DslSpec extends Specification {
 
     def "Methods of DSL delegates annotated with @Inherited WILL be available in nested closures"() {
       when:
-        DslScript.run({
+        DslScripts.run({
             hello {
                 inheritThis("Foo")
             }
@@ -115,7 +115,7 @@ class DslSpec extends Specification {
 
     def "You can also eval closures"() {
       when:
-        DslScript.run({
+        DslScripts.run({
             hello {
                 greet 'Foo'
             }
@@ -132,7 +132,7 @@ class DslSpec extends Specification {
 
     private DslRoot run(String script) {
         def root = new DslRoot()
-        DslScript.run(shell.parse(script), root)
+        DslScripts.run(shell.parse(script), root)
         return root
     }
 

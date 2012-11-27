@@ -9,12 +9,31 @@ class DslDelegate {
 
     final DslContext context
     final parent
+    final String path
     final List delegates
 
-    DslDelegate(DslDelegate parent, DslContext context, delegate) {
-        this.@parent = parent
+    DslDelegate(DslContext context, delegate) {
+        this.@parent = null
+        this.@path = '/'
         this.@context = context
         this.@delegates = delegate instanceof Collection ? delegate as List : [ delegate ]
+    }
+
+    DslDelegate(DslDelegate parent, String method, DslContext context, delegate) {
+        this.@parent = parent
+        if ( parent.@path == '/' ) {
+            this.@path = '/' + method
+        }
+        else {
+            this.@path = parent.@path + '/' + method
+        }
+        this.@context = context
+        this.@delegates = delegate instanceof Collection ? delegate as List : [ delegate ]
+    }
+
+    @Override
+    String toString() {
+        'DslDelegate{' + this.@path + '->' + this.@delegates + '}'
     }
 
     @Override
