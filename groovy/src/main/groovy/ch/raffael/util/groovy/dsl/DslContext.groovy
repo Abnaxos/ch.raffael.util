@@ -47,7 +47,7 @@ class DslContext {
             WithBody withBody
             try {
                 if ( !dslDelegate.is(currentDelegate) && delegate.class.getAnnotation(Inherited) == null ) {
-                    throw new MissingMethodException(name, delegate.getClass(), args)
+                    throw new MissingMethodException(name, DslDelegate, args)
                 }
                 method = pickMethod(delegate, name, callArgs)
                 if ( method == null ) {
@@ -128,7 +128,7 @@ class DslContext {
                 }
             }
         }
-        throw new MissingMethodException(name, delegate.getClass(), args)
+        throw new MissingMethodException(name, DslDelegate, args)
     }
 
     private static MetaMethod pickMethod(delegate, String name, Object[] args) {

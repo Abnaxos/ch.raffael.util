@@ -25,12 +25,16 @@ class DslScript {
         DslContext context = new DslContext()
         context.withDelegate(null, rootDelegate) { DslDelegate dsld ->
             script.metaClass = Groovy.makeExpando(script) { emc ->
-                emc.methodMissing = { String name, args ->
+                def invokeDslMethod = { String name, args ->
                     context.invokeDelegateMethod(dsld, name, args as Object[])
                 }
-                emc.propertyMissing = { String name ->
+                def getDslProperty = { String name ->
                     context.getDelegateProperty(dsld, name)
                 }
+                emc.invokeDslMethod = invokeDslMethod
+                emc.methodMissing = invokeDslMethod
+                emc.getDslProperty = getDslProperty
+                emc.propertyMissing = getDslProperty
                 if ( expandoSetup != null ) {
                     Groovy.prepare(expandoSetup, null).call(emc)
                 }
