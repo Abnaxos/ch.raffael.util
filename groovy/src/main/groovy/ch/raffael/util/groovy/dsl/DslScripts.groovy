@@ -12,6 +12,14 @@ final class DslScripts {
     private DslScripts() {
     }
 
+    static DslDelegate wrap(delegate) {
+        delegate != null ? new DslDelegate(delegate) : null
+    }
+
+    static DslDelegate wrap(DslDelegate parent, String method, delegate) {
+        delegate != null ? new DslDelegate(parent, method, delegate) : null
+    }
+
     /**
      * Evaluate a DSL script using the given root delegate.
      *
@@ -25,29 +33,27 @@ final class DslScripts {
         if ( binding != null ) {
             script.setBinding(binding)
         }
-        DslContext context = new DslContext()
-        context.withDelegate(rootDelegate) { DslDelegate dsld ->
-            //noinspection GroovyMissingReturnStatement
-            script.metaClass = Groovy.makeExpando(script) { emc ->
-                def invokeDslMethod = { String name, args ->
-                    context.invokeDelegateMethod(dsld, name, args as Object[])
-                }
-                def getDslProperty = { String name ->
-                    context.getDelegateProperty(dsld, name)
-                }
-                emc.invokeDslMethod = invokeDslMethod
-                emc.methodMissing = invokeDslMethod
-                emc.getDslProperty = getDslProperty
-                emc.propertyMissing = getDslProperty
-                if ( expandoSetup != null ) {
-                    Groovy.prepare(expandoSetup, null).call(emc)
-                }
+        DslDelegate dsld = wrap(rootDelegate)
+        //noinspection GroovyMissingReturnStatement
+        script.metaClass = Groovy.makeExpando(script) { emc ->
+            def invokeDslMethod = { String name, args ->
+                DslInvoke.invokeDelegateMethod(dsld, name, args as Object[])
             }
-            if ( binding != null ) {
-                script.setBinding(binding)
+            def getDslProperty = { String name ->
+                DslInvoke.getDelegateProperty(dsld, name)
             }
-            script.run()
+            emc.invokeDslMethod = invokeDslMethod
+            emc.methodMissing = invokeDslMethod
+            emc.getDslProperty = getDslProperty
+            emc.propertyMissing = getDslProperty
+            if ( expandoSetup != null ) {
+                Groovy.prepare(expandoSetup, null).call(emc)
+            }
         }
+        if ( binding != null ) {
+            script.setBinding(binding)
+        }
+        script.run()
     }
 
     /**
@@ -60,9 +66,8 @@ final class DslScripts {
      * @return The return value of the closure.
      */
     static eval(Closure closure, rootDelegate, Object... args) {
-        new DslContext().withDelegate(rootDelegate) { DslDelegate dsld ->
-            Groovy.prepare(closure, dsld, Closure.DELEGATE_FIRST).call(args)
-        }
+        def dsld = wrap(rootDelegate)
+        Groovy.prepare(closure, dsld, Closure.DELEGATE_FIRST).invokeMethod('doCall', args)
     }
 
     /**

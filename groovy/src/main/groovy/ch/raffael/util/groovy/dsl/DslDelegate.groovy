@@ -7,19 +7,17 @@ package ch.raffael.util.groovy.dsl
  */
 class DslDelegate {
 
-    final DslContext context
     final parent
     final String path
     final List delegates
 
-    DslDelegate(DslContext context, delegate) {
+    DslDelegate(delegate) {
         this.@parent = null
         this.@path = '/'
-        this.@context = context
         this.@delegates = delegate instanceof Collection ? delegate as List : [ delegate ]
     }
 
-    DslDelegate(DslDelegate parent, String method, DslContext context, delegate) {
+    DslDelegate(DslDelegate parent, String method, delegate) {
         this.@parent = parent
         if ( parent.@path == '/' ) {
             this.@path = '/' + method
@@ -27,7 +25,6 @@ class DslDelegate {
         else {
             this.@path = parent.@path + '/' + method
         }
-        this.@context = context
         this.@delegates = delegate instanceof Collection ? delegate as List : [ delegate ]
     }
 
@@ -38,7 +35,7 @@ class DslDelegate {
 
     @Override
     def getProperty(String name) {
-        this.@context.getDelegateProperty(this, name)
+        DslInvoke.getDelegateProperty(this, name)
     }
 
     @Override
@@ -50,7 +47,7 @@ class DslDelegate {
 
     @Override
     def invokeMethod(String name, args) {
-        this.@context.invokeDelegateMethod(this, name, args as Object[])
+        DslInvoke.invokeDelegateMethod(this, name, args as Object[])
     }
 
 }

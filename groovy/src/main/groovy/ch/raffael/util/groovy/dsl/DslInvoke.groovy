@@ -4,61 +4,39 @@ import ch.raffael.util.groovy.Groovy
 
 import java.lang.reflect.Method
 
+import static ch.raffael.util.groovy.dsl.DslScripts.wrap
+
 /**
- * Internal DSL context.
+ * Helper methods for DslDelegate. Handles the actual method invocation, annotation
+ * processing etc.
  *
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-class DslContext {
+final class DslInvoke {
 
     private final static Object[] EMPTY_ARGS = new Object[0]
 
-    DslDelegate currentDelegate = null
-
-    DslContext() {
+    private DslInvoke() {
     }
 
-    @Override
-    String toString() {
-        'DslContext{' + currentDelegate + '}'
-    }
-
-    def withDelegate(delegate, Closure closure) {
-        doWithDelegate(new DslDelegate(this, delegate), closure)
-    }
-
-    private doWithDelegate(DslDelegate parent, String method, delegate, Closure closure) {
-        doWithDelegate(new DslDelegate(parent, method, this, delegate), closure)
-    }
-
-    private doWithDelegate(DslDelegate wrapper, Closure closure) {
-        DslDelegate prev = currentDelegate
-        currentDelegate = wrapper
-        try {
-            Groovy.prepare(closure, null).call(wrapper)
-        }
-        finally {
-            currentDelegate = prev
-        }
-    }
-
-    def getDelegateProperty(DslDelegate dslDelegate, String name) {
+    static getDelegateProperty(DslDelegate dslDelegate, String name) {
         doInvokeDelegateMethod(dslDelegate, dslDelegate, name, EMPTY_ARGS)
     }
 
-    def invokeDelegateMethod(DslDelegate dslDelegate, String name, Object[] args) {
+    static invokeDelegateMethod(DslDelegate dslDelegate, String name, Object[] args) {
         doInvokeDelegateMethod(dslDelegate, dslDelegate, name, args)
     }
 
-    private doInvokeDelegateMethod(DslDelegate dslDelegate, DslDelegate topInvoker, String name, Object[] args) {
+    private static doInvokeDelegateMethod(DslDelegate dslDelegate, DslDelegate topInvoker, String name, Object[] args) {
         MissingMethodException missingMethod = null
         for ( delegate in dslDelegate.@delegates ) {
             Closure closure = null
             Object[] callArgs = args
             MetaMethod method
+            Method javaMethod
             WithBody withBody
             try {
-                if ( !dslDelegate.is(currentDelegate) && delegate.class.getAnnotation(Inherited) == null ) {
+                if ( dslDelegate != topInvoker && delegate.class.getAnnotation(Inherited) == null ) {
                     throw new MissingMethodException(name, DslDelegate, args)
                 }
                 method = pickMethod(delegate, name, callArgs)
@@ -70,7 +48,7 @@ class DslContext {
                         method = pickMethod(delegate, name, callArgs)
                     }
                 }
-                Method javaMethod = method ? findJavaMethod(method) : null
+                javaMethod = method ? findJavaMethod(method) : null
                 if ( javaMethod == null || !javaMethod.getAnnotation(DSL) ) {
                     return tryFallback(delegate, name, args)
                 }
@@ -87,16 +65,20 @@ class DslContext {
             def retval = method.doMethodInvoke(delegate, callArgs)
             if ( withBody ) {
                 if ( closure != null ) {
-                    doWithDelegate(topInvoker, name, retval) { DslDelegate dsld ->
-                        closure = Groovy.prepare(closure, dsld, Closure.DELEGATE_FIRST)
-                        if ( withBody.invoker() ) {
-                            retval = delegate."${withBody.invoker()}"(closure)
-                        }
-                        else {
-                            retval = closure.call()
-                        }
+                    closure = Groovy.prepare(closure, wrap(topInvoker, name, retval), Closure.DELEGATE_FIRST)
+                    if ( withBody.invoker() ) {
+                        retval = delegate."${withBody.invoker()}"(closure)
+                    }
+                    else {
+                        retval = closure.call()
                     }
                 }
+                else {
+                    retval = wrap(topInvoker, name, retval)
+                }
+            }
+            else if ( javaMethod.getAnnotation(Wrap) != null ) {
+                retval = wrap(topInvoker, name, retval)
             }
             return retval
         }
