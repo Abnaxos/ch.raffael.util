@@ -11,15 +11,17 @@ class DslDelegate {
     final parent
     final String path
     final List delegates
+    final boolean forceInvoke
 
-    DslDelegate(DslContext context, delegate) {
+    DslDelegate(DslContext context, delegate, boolean forceInvoke = false) {
         this.@parent = null
         this.@path = '/'
         this.@context = context
         this.@delegates = delegate instanceof Collection ? delegate as List : [ delegate ]
+        this.@forceInvoke = forceInvoke
     }
 
-    DslDelegate(DslDelegate parent, String method, DslContext context, delegate) {
+    DslDelegate(DslDelegate parent, String method, DslContext context, delegate, boolean forceInvoke = false) {
         this.@parent = parent
         if ( parent.@path == '/' ) {
             this.@path = '/' + method
@@ -29,6 +31,7 @@ class DslDelegate {
         }
         this.@context = context
         this.@delegates = delegate instanceof Collection ? delegate as List : [ delegate ]
+        this.@forceInvoke = forceInvoke
     }
 
     @Override

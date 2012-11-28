@@ -24,4 +24,6 @@ import java.lang.annotation.Target
      */
     String invoker() default ""
 
+    boolean required() default false
+
 }

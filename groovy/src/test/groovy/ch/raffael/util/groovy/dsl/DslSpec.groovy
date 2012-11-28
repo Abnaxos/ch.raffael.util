@@ -101,6 +101,17 @@ class DslSpec extends Specification {
         root.result == 'Hello Shortcut'
     }
 
+    def "Shortcut won't work on @WithBody(required = true)"() {
+      when:
+        run {
+            hello2.greet 'This throws'
+        }
+
+      then:
+        def e = thrown MissingMethodException
+        e.method == 'hello2'
+    }
+
     def "Call closure using invoker if specified in @WithBody"() {
       when:
         def root = run("withInvoker { name -> greet name }")

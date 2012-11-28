@@ -23,14 +23,6 @@ class DslContext {
         'DslContext{' + currentDelegate + '}'
     }
 
-    DslDelegate wrap(delegate) {
-        delegate != null ? new DslDelegate(this, delegate) : null
-    }
-
-    DslDelegate wrap(DslDelegate parent, String method, delegate) {
-        delegate != null ? new DslDelegate(parent, method, this, delegate) : null
-    }
-
     def withDelegate(delegate, Closure closure) {
         doWithDelegate(new DslDelegate(this, delegate), closure)
     }
@@ -67,7 +59,7 @@ class DslContext {
             Method javaMethod
             WithBody withBody
             try {
-                if ( !dslDelegate.is(currentDelegate) && delegate.class.getAnnotation(Inherited) == null ) {
+                if ( !dslDelegate.@forceInvoke && !dslDelegate.is(currentDelegate) && delegate.class.getAnnotation(Inherited) == null ) {
                     throw new MissingMethodException(name, DslDelegate, args)
                 }
                 method = pickMethod(delegate, name, callArgs)
@@ -106,12 +98,15 @@ class DslContext {
                         }
                     }
                 }
+                else if ( withBody.required() ) {
+                    throw new MissingMethodException(name, DslDelegate, args)
+                }
                 else {
-                    retval = wrap(topInvoker, name, retval)
+                    retval = wrapForceInvoke(topInvoker, name, retval)
                 }
             }
             else if ( javaMethod.getAnnotation(Wrap) ) {
-                retval = wrap(topInvoker, name, retval)
+                retval = wrapForceInvoke(topInvoker, name, retval)
             }
             return retval
         }
@@ -161,4 +156,9 @@ class DslContext {
     private static MetaMethod pickMethod(delegate, String name, Object[] args) {
         delegate.metaClass.pickMethod(name, args.collect({ arg -> arg?.getClass() }) as Class[])
     }
+
+    DslDelegate wrapForceInvoke(DslDelegate parent, String method, delegate) {
+        delegate != null ? new DslDelegate(parent, method, this, delegate, true) : null
+    }
+
 }

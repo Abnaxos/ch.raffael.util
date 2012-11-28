@@ -15,7 +15,7 @@ class DslRoot {
         new Hello(parent: this)
     }
 
-    @DSL @WithBody
+    @DSL @WithBody(required = true)
     def hello2() {
         [new Hello(parent: this), new Second(parent: this)]
     }
