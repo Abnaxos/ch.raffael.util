@@ -72,7 +72,7 @@ class DslContext {
                     }
                 }
                 javaMethod = method ? findJavaMethod(method) : null
-                if ( javaMethod == null || !javaMethod.getAnnotation(DSL) ) {
+                if ( javaMethod == null || !javaMethod.getAnnotation(Dsl) ) {
                     return tryFallback(delegate, name, args)
                 }
                 withBody = javaMethod.getAnnotation(WithBody)

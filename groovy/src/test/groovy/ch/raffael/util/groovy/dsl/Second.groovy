@@ -7,12 +7,12 @@ class Second {
 
     def parent
 
-    @DSL
+    @Dsl
     void greet(String name) {
         parent.result = "Hi $name (won't be called)"
     }
 
-    @DSL
+    @Dsl
     void second(String arg) {
         parent.result = "Second: $arg"
     }

@@ -7,7 +7,7 @@ class Hello {
 
     def parent
 
-    @DSL
+    @Dsl
     void greet(String name) {
         parent.result = "Hello ${name}"
     }
@@ -26,17 +26,17 @@ class Hello {
         }
     }
 
-    @DSL
+    @Dsl
     void noargs() {
         parent.result = "no args"
     }
 
-    @DSL
+    @Dsl
     def closure(Closure closure) {
         parent.result = closure
     }
 
-    @DSL @WithBody
+    @Dsl @WithBody
     def closure() {
         parent.result = "Nope, the method with closure parameter has precedence"
     }

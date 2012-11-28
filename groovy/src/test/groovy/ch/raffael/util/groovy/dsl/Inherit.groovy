@@ -5,7 +5,7 @@ package ch.raffael.util.groovy.dsl
 @Inherited
 class Inherit {
 
-    @DSL
+    @Dsl
     def inheritThis(String str) {
         throw new IllegalStateException("Inherited: $str")
     }

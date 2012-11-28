@@ -10,22 +10,22 @@ class DslRoot {
     DslRoot() {
     }
 
-    @DSL @WithBody
+    @Dsl @WithBody
     def hello() {
         new Hello(parent: this)
     }
 
-    @DSL @WithBody(required = true)
+    @Dsl @WithBody(required = true)
     def hello2() {
         [new Hello(parent: this), new Second(parent: this)]
     }
 
-    @DSL @WithBody(invoker='myInvoker')
+    @Dsl @WithBody(invoker='myInvoker')
     def withInvoker() {
         new Hello(parent: this)
     }
 
-    @DSL @WithBody
+    @Dsl @WithBody
     def list() {
         def l = new List()
         result = l.list

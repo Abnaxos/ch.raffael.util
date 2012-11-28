@@ -155,7 +155,6 @@ class DslSpec extends Specification {
     }
 
     def "Embedded logic works"() {
-        // and actually, I would *love* to understand *why* this works ... ;)
       when:
         def root = run {
             list {

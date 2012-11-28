@@ -7,7 +7,7 @@ class List {
 
     final list = []
 
-    @DSL
+    @Dsl
     void add(Object elem) {
         list << elem
     }
