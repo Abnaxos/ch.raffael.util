@@ -25,6 +25,13 @@ class DslRoot {
         new Hello(parent: this)
     }
 
+    @DSL @WithBody
+    def list() {
+        def l = new List()
+        result = l.list
+        return l
+    }
+
     def myInvoker(Closure closure) {
         closure.call('Invoker')
     }

@@ -1,7 +1,7 @@
 package ch.raffael.util.groovy.dsl
 
 import spock.lang.Shared
-import spock.lang.Specification;
+import spock.lang.Specification
 
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
@@ -30,11 +30,24 @@ class DslSpec extends Specification {
 
     def "Methods won't be available in nested closures"() {
       when:
-        def root = run("hello { hello2 { throw Exception('Will not happen') } }")
+        def firstRun = run {
+            hello2 {
+                greet 'FirstRun'
+            }
+        }
+        //def root = run("hello { hello2 { throw Exception('Will not happen') } }")
+        def root = run {
+            hello {
+                hello2 {
+                    throw Exception('Will not happen')
+                }
+            }
+        }
 
       then:
         def e = thrown(MissingMethodException)
         e.method == 'hello2'
+        firstRun.result == 'Hello FirstRun'
     }
 
     def "Methods of DSL delegates annotated with @Inherited WILL be available in nested closures"() {
@@ -128,6 +141,34 @@ class DslSpec extends Specification {
       then:
         // we're not going to test things through here; if there was no exception, it'll worked
         true
+    }
+
+    def "Embedded logic works"() {
+        // and actually, I would *love* to understand *why* this works ... ;)
+      when:
+        def root = run {
+            list {
+                (1..5).each {
+                    add it
+                    try {
+                        hello {
+                            greet "Raffi"
+                        }
+                        assert false
+                    }
+                    catch ( MissingMethodException e ) {
+                        assert e.method == 'hello'
+                    }
+                }
+            }
+        }
+
+      then:
+        root.result == [ 1, 2, 3, 4, 5 ]
+    }
+
+    private DslRoot run(Closure script) {
+        DslScripts.run(script, new DslRoot())
     }
 
     private DslRoot run(String script) {

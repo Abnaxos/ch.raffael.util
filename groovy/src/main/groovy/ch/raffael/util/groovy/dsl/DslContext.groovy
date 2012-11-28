@@ -23,6 +23,14 @@ class DslContext {
         'DslContext{' + currentDelegate + '}'
     }
 
+    DslDelegate wrap(delegate) {
+        delegate != null ? new DslDelegate(this, delegate) : null
+    }
+
+    DslDelegate wrap(DslDelegate parent, String method, delegate) {
+        delegate != null ? new DslDelegate(parent, method, this, delegate) : null
+    }
+
     def withDelegate(delegate, Closure closure) {
         doWithDelegate(new DslDelegate(this, delegate), closure)
     }
@@ -56,6 +64,7 @@ class DslContext {
             Closure closure = null
             Object[] callArgs = args
             MetaMethod method
+            Method javaMethod
             WithBody withBody
             try {
                 if ( !dslDelegate.is(currentDelegate) && delegate.class.getAnnotation(Inherited) == null ) {
@@ -70,7 +79,7 @@ class DslContext {
                         method = pickMethod(delegate, name, callArgs)
                     }
                 }
-                Method javaMethod = method ? findJavaMethod(method) : null
+                javaMethod = method ? findJavaMethod(method) : null
                 if ( javaMethod == null || !javaMethod.getAnnotation(DSL) ) {
                     return tryFallback(delegate, name, args)
                 }
@@ -97,6 +106,12 @@ class DslContext {
                         }
                     }
                 }
+                else {
+                    retval = wrap(topInvoker, name, retval)
+                }
+            }
+            else if ( javaMethod.getAnnotation(Wrap) ) {
+                retval = wrap(topInvoker, name, retval)
             }
             return retval
         }
