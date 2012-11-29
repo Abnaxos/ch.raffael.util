@@ -43,7 +43,7 @@
     <dependency>
       <groupId>ch.raffael.util</groupId>
       <artifactId>cru-common</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.1</version>
       <type>jar</type>
       <scope>compile</scope>
     </dependency>
