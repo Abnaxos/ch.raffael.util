@@ -16,13 +16,14 @@
 
 package ch.raffael.util.binding.validate;
 
-import ch.raffael.util.binding.PresentationModelMember;
-import ch.raffael.util.common.collections.ReadOnlyIterator;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import ch.raffael.util.binding.PresentationModelMember;
+
+import static com.google.common.collect.Iterators.*;
 
 
 /**
@@ -55,6 +56,6 @@ public abstract class AbstractCompoundValidator<T> extends PresentationModelMemb
 
     @Override
     public Iterator<Validator<T>> iterator() {
-        return new ReadOnlyIterator<Validator<T>>(validators.iterator());
+        return unmodifiableIterator(validators.iterator());
     }
 }

@@ -24,7 +24,8 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 import ch.raffael.util.beans.ObservableSupport;
-import ch.raffael.util.common.collections.ReadOnlyIterator;
+
+import static com.google.common.collect.Iterators.*;
 
 
 /**
@@ -86,7 +87,7 @@ public class BufferGroup implements Buffer, Iterable<Buffer> {
 
     @Override
     public Iterator<Buffer> iterator() {
-        return new ReadOnlyIterator<Buffer>(members.iterator());
+        return unmodifiableIterator(members.iterator());
     }
 
     public boolean isSkipNonBuffering() {
