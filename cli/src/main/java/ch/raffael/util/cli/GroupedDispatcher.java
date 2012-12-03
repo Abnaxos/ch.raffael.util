@@ -31,6 +31,14 @@ public class GroupedDispatcher implements CommandDispatcher {
         return Collections.unmodifiableMap(groups);
     }
 
+    public void register(String group, Object target) {
+        ensureDefaultGroup(group).register(target);
+    }
+
+    public void registerStatic(String group, Class clazz) {
+        ensureDefaultGroup(group).registerStatic(clazz);
+    }
+
     @Override
     public CommandDescriptor findCommand(String command) {
         int pos = command.indexOf(':');
@@ -75,4 +83,17 @@ public class GroupedDispatcher implements CommandDispatcher {
             }
         }).values());
     }
+
+    private DefaultDispatcher ensureDefaultGroup(String name) {
+        CommandDispatcher dispatcher = groups.get(name);
+        if ( dispatcher == null ) {
+            dispatcher = new DefaultDispatcher();
+            addGroup(name, dispatcher);
+        }
+        else if ( !(dispatcher instanceof DefaultDispatcher) ) {
+            throw new IllegalStateException("A dispatcher for group " + name + " is already registered and is not a default dispatcher");
+        }
+        return (DefaultDispatcher)dispatcher;
+    }
+
 }
