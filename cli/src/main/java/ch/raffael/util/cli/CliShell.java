@@ -14,6 +14,8 @@ import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.kohsuke.args4j.Argument;
+
 import ch.raffael.util.common.Classes;
 
 
@@ -27,7 +29,7 @@ public class CliShell implements Runnable {
     protected final ExecutorService commandExecutor;
 
     private String newline = System.getProperty("line.separator");
-    private CmdLineHandler handler;
+    private CommandDispatcher dispatcher = null;
     private Thread shellThread = null;
 
     public CliShell(Reader input, Writer output, ExecutorService commandExecutor) {
@@ -54,12 +56,12 @@ public class CliShell implements Runnable {
         this.newline = newline;
     }
 
-    public CmdLineHandler getHandler() {
-        return handler;
+    public CommandDispatcher getDispatcher() {
+        return dispatcher;
     }
 
-    public void setHandler(CmdLineHandler handler) {
-        this.handler = handler;
+    public void setDispatcher(CommandDispatcher dispatcher) {
+        this.dispatcher = dispatcher;
     }
 
     @Override
@@ -73,8 +75,7 @@ public class CliShell implements Runnable {
         try {
             while ( !Thread.interrupted() ) {
                 prompt(output);
-                String command = null;
-                command = input.readLine();
+                final String command = input.readLine();
                 if ( command == null ) {
                     break;
                 }
@@ -82,14 +83,22 @@ public class CliShell implements Runnable {
                     continue;
                 }
                 PipedWriter pipeOut = new PipedWriter();
-                BufferedReader cmdIn = new BufferedReader(new PipedReader(pipeOut)); // IOException: fatal
+                final BufferedReader cmdIn = new BufferedReader(new PipedReader(pipeOut)); // IOException: fatal
                 final PrintWriter cmdOut = new PrintWriter(pipeOut);
-                final CmdLineParser parser = new CmdLineParser(command, cmdOut, handler());
+                final CmdLineTokenizer tokenizer = new CmdLineTokenizer();
                 commandExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            parser.parse();
+                            CmdLine cmdLine = new CmdLineTokenizer().toCmdLine(command);
+                            if ( cmdLine == null ) {
+                                return;
+                            }
+                            CommandDescriptor cmd = dispatcher.findCommand(cmdLine.getCommand());
+                            if ( cmd == null ) {
+                                throw new NoSuchCommandException("Unknown command: " + cmdLine.getCommand());
+                            }
+                            cmd.getHandler().execute(cmdOut, cmdLine.getArguments());
                         }
                         catch ( Exception e ) {
                             exception(output, e);
@@ -145,10 +154,6 @@ public class CliShell implements Runnable {
         }
     }
 
-    protected CmdLineHandler handler() {
-        return handler;
-    }
-
     protected void prompt(PrintWriter out) throws IOException {
         out.write("> ");
         out.flush();
@@ -190,18 +195,18 @@ public class CliShell implements Runnable {
 
     public static void main(String[] args) throws Exception {
         TestShell shell = new TestShell();
-        CommandDispatcher dispatcher = new CommandDispatcher();
+        GroupedDispatcher dispatcher = new GroupedDispatcher();
         StandardCommands.register(dispatcher);
-        dispatcher.add("test", TestCommands.class, new TestCommands());
-        dispatcher.add("shell", TestShell.class, shell);
-        shell.setHandler(dispatcher.handler());
+        dispatcher.addGroup("test", new DefaultDispatcher(new TestCommands()));
+        dispatcher.addGroup("shell", new DefaultDispatcher(shell));
+        shell.setDispatcher(dispatcher);
         new Thread(shell).start();
     }
 
     public static class TestCommands {
 
         @Command(name = "throw", doc = "Throw an exception.")
-        public void throwCmd(@Argument(name = "exception", required = true, doc = "The exception to throw") String excClass) throws Throwable {
+        public void throwCmd(@Argument(required = true, usage = "The exception to throw") String excClass) throws Throwable {
             throw (Throwable)Class.forName(excClass, false, Classes.classLoader()).newInstance();
         }
 
@@ -233,10 +238,10 @@ public class CliShell implements Runnable {
             super.printLine(out, line);
         }
 
-        @Command(name="prefix")
-        public void prefix(@Argument(name = "enable", required = true) boolean prefix) {
-            this.prefix = prefix;
-        }
+        //@Command(name="prefix")
+        //public void prefix(@Argument(name = "enable", required = true) boolean prefix) {
+        //    this.prefix = prefix;
+        //}
 
     }
 }
