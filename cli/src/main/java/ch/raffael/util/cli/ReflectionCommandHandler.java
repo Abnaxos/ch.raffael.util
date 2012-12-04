@@ -122,7 +122,7 @@ public class ReflectionCommandHandler implements CommandHandler {
             method.invoke(instance, argArray);
         }
         catch ( InvocationTargetException e ) {
-            Throwables.propagateIfPossible(e.getTargetException());
+            Throwables.propagateIfPossible(e.getTargetException(), Exception.class);
             throw e;
         }
     }
