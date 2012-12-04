@@ -1,7 +1,11 @@
 package ch.raffael.util.cli;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import ch.raffael.util.common.UnexpectedException;
 
 import static java.lang.Character.*;
 
@@ -9,7 +13,9 @@ import static java.lang.Character.*;
 /**
  * @author <a href="mailto:herzog@raffael.ch">Raffael Herzog</a>
  */
-public class CmdLineTokenizer {
+public class CmdLineTokenizer implements Serializable, Cloneable {
+
+    private static final long serialVersionUID = 12120401L;
 
     private String quoteChars = "\"'";
     private char escapeChar = '\\';
@@ -26,11 +32,23 @@ public class CmdLineTokenizer {
         reset(null);
     }
 
+    @SuppressWarnings("CloneDoesntDeclareCloneNotSupportedException")
+    @Override
+    protected CmdLineTokenizer clone() {
+        try {
+            return (CmdLineTokenizer)super.clone();
+        }
+        catch ( CloneNotSupportedException e ) {
+            throw new UnexpectedException(e);
+        }
+    }
+
     private void reset(String source) {
         this.source = source;
         position = 0;
         current = -1;
         escaped = false;
+        buf.setLength(0);
     }
 
     public String getQuoteChars() {
@@ -66,18 +84,101 @@ public class CmdLineTokenizer {
     }
 
     public CmdLine toCmdLine(String source) throws CmdLineSyntaxException {
-        List<String> words = new ArrayList<String>();
-        reset(source);
-        next();
-        for ( String word = nextWord(); word != null; word = nextWord() ) {
-            words.add(word);
+        try {
+            List<String> words = new ArrayList<String>();
+            reset(source);
+            next();
+            for ( String word = nextWord(); word != null; word = nextWord() ) {
+                words.add(word);
+            }
+            if ( words.isEmpty() ) {
+                return null;
+            }
+            else {
+                return new CmdLine(words.get(0), words.subList(1, words.size()).toArray(new String[words.size() - 1]));
+            }
         }
-        if ( words.isEmpty() ) {
-            return null;
+        finally {
+            reset(null);
+        }
+    }
+
+    public String quote(String[] cmdLine) {
+        return quote(cmdLine, isJavaEscapesEnabled());
+    }
+
+    public String quote(String[] cmdLine, boolean escapeNewlines) {
+        if ( cmdLine == null || cmdLine.length == 0 ) {
+            return "";
         }
         else {
-            return new CmdLine(words.get(0), words.subList(1, words.size()).toArray(new String[words.size() - 1]));
+            return quote(Arrays.asList(cmdLine));
         }
+    }
+
+    public String quote(Iterable<String> cmdLine) {
+        return quote(cmdLine, isJavaEscapesEnabled());
+    }
+
+    public String quote(Iterable<String> cmdLine, boolean escapeNewlines) {
+        if ( cmdLine == null ) {
+            return "";
+        }
+        if ( quoteChars.isEmpty() ) {
+            throw new IllegalStateException("Cannot quote when no quote chars set");
+        }
+        if ( escapeNewlines && !isJavaEscapesEnabled() ) {
+            throw new IllegalStateException("Cannot escape newlines when Java escapes disabled");
+        }
+        char quoteChar = quoteChars.charAt(0);
+        StringBuilder buf = new StringBuilder();
+        for ( String word : cmdLine ) {
+            if ( buf.length() > 0 ) {
+                buf.append(' ');
+            }
+            if ( word.isEmpty() ) {
+                buf.append(quoteChar).append(quoteChar);
+                continue;
+            }
+            boolean doQuote = false;
+            for ( int i = 0; i < word.length(); i++ ) {
+                char c = word.charAt(i);
+                if ( isWhitespace(c) ) {
+                    doQuote = true;
+                    break;
+                }
+                else if ( quoteChars.indexOf(c) >= 0 ) {
+                    doQuote = true;
+                    break;
+                }
+                else if ( commentChars.indexOf(c) >= 0 ) {
+                    doQuote = true;
+                    break;
+                }
+            }
+            if ( doQuote ) {
+                buf.append(quoteChar);
+            }
+            for ( int i = 0; i < word.length(); i++ ) {
+                char c = word.charAt(i);
+                if ( c == quoteChar || c == '\\' ) {
+                    buf.append('\\').append(c);
+                }
+                else if ( escapeNewlines && c == '\n' ) {
+                    buf.append("\\n");
+                }
+                else if ( escapeNewlines && c == '\r' ) {
+                    buf.append("\\r");
+                }
+                else {
+                    buf.append(c);
+                }
+            }
+            if ( doQuote ) {
+                buf.append(quoteChar);
+            }
+        }
+        return buf.toString();
     }
 
     private String nextWord() throws CmdLineSyntaxException {

@@ -33,9 +33,9 @@ public class CmdLine {
         if ( command == null || command.length < 1 ) {
             throw new IllegalArgumentException("Command line must contain at least one element");
         }
-        this.command = command[1];
+        this.command = command[0];
         if ( command.length > 1 ) {
-            arguments = new String[command.length];
+            arguments = new String[command.length - 1];
             System.arraycopy(command, 1, this.arguments, 0, command.length - 1);
         }
         else {

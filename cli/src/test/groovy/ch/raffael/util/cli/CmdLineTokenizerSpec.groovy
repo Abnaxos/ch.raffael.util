@@ -162,6 +162,29 @@ class CmdLineTokenizerSpec extends Specification {
         ' \\  \\ \\ ' | cmdLine(' ', '  ')
     }
 
+    def "quote() returns a string that can be tokenized back to the input"() {
+      given:
+        def cmd = [
+                'foo',
+                'bar',
+                'with whitespace',
+                'with\\escape',
+                'with"primary"quote',
+                'with\'secondary\'quote',
+                'with#comment',
+                'with\nLF\rand\r\nCR'
+        ]
+        def tokenizer = new CmdLineTokenizer()
+
+      when:
+        def quoted = tokenizer.quote(cmd)
+        def retokenized = tokenizer.toCmdLine(quoted)
+
+      then:
+        quoted == /foo bar "with whitespace" with\\escape "with\"primary\"quote" "with'secondary'quote" "with#comment" "with\nLF\rand\r\nCR"/
+        retokenized == new CmdLine(cmd)
+    }
+
     private CmdLine tokenize(String cmdLine, Closure setup = null) {
         def tok = new CmdLineTokenizer()
         if ( setup != null ) {
