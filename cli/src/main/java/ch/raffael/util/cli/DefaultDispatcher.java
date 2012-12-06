@@ -89,15 +89,18 @@ public class DefaultDispatcher implements CommandDispatcher {
 
     @Override
     public CommandDescriptor findCommand(String command) {
-        CommandDescriptor description = commands.get(command);
-        if ( description == null ) {
+        CommandDescriptor descriptor = commands.get(command);
+        if ( descriptor == null ) {
             Set<CommandDescriptor> alias = aliases.get(command);
             if ( aliases.size() != 1 ) {
                 return null;
             }
-            description = Iterables.getFirst(alias, null);
+            descriptor = Iterables.getFirst(alias, null);
         }
-        return description;
+        if ( descriptor != null ) {
+            descriptor = aliasFilteredDescriptor(descriptor);
+        }
+        return descriptor;
     }
 
     @Override
@@ -105,13 +108,17 @@ public class DefaultDispatcher implements CommandDispatcher {
         return Iterables.transform(commands.values(), new Function<CommandDescriptor, CommandDescriptor>() {
             @Override
             public CommandDescriptor apply(CommandDescriptor input) {
-                return new CommandDescriptor(input.getName(), Iterables.filter(input.getAliases(), new Predicate<String>() {
-                    @Override
-                    public boolean apply(String input) {
-                        return aliases.get(input).size() == 1;
-                    }
-                }), input.getHandler());
+                return aliasFilteredDescriptor(input);
             }
         });
+    }
+
+    private CommandDescriptor aliasFilteredDescriptor(CommandDescriptor input) {
+        return new CommandDescriptor(input.getName(), Iterables.filter(input.getAliases(), new Predicate<String>() {
+            @Override
+            public boolean apply(String input) {
+                return aliases.get(input).size() == 1;
+            }
+        }), input.getHandler());
     }
 }
